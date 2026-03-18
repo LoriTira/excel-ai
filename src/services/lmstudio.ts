@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:1234";
+// Requests go through the webpack dev server proxy (/lmstudio -> http://127.0.0.1:1234)
+// This avoids mixed-content blocking (HTTPS add-in -> HTTP LM Studio).
+const BASE_URL = "/lmstudio";
 const DEFAULT_TEMPERATURE = 0.3;
 const DEFAULT_MAX_TOKENS = 512;
 const REQUEST_TIMEOUT_MS = 30000;
@@ -44,7 +46,7 @@ export async function complete(prompt: string, model?: string): Promise<string> 
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new Error("Request timed out (30s)");
     }
-    throw new Error(`LM Studio not running at ${BASE_URL}`);
+    throw new Error("LM Studio not running at 127.0.0.1:1234");
   } finally {
     clearTimeout(timeout);
   }

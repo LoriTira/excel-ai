@@ -9,10 +9,71 @@
 
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            margin: 0;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+        body.dark-mode {
+            color: #f0f0f0;
+            background: #1e1e1e;
+        }
+        body.dark-mode h2,
+        body.dark-mode h3 {
+            color: #ffffff;
+        }
+        code {
+            background: #e8e8e8;
+            color: #1a6b37;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        body.dark-mode code {
+            background: #2d2d2d;
+            color: #50d080;
+        }
+        h2 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 img {
+            border-radius: 6px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+    <script>
+        function applyTheme() {
+            // Detect dark mode: check OS preference and Office document theme
+            var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        // Apply on load and when OS theme changes
+        document.addEventListener('DOMContentLoaded', applyTheme);
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+        }
+    </script>
 </head>
 
-<body style="font-family: 'Segoe UI', sans-serif; padding: 20px;">
-    <h2>Excel AI</h2>
+<body>
+    <h2><img src="../../assets/logo-filled.png" width="32" height="32" alt="AI" /> Excel AI</h2>
     <p>Use <code>=EXCELAI.AI("your prompt")</code> in any cell.</p>
     <h3>Examples</h3>
     <ul>
@@ -21,7 +82,7 @@
         <li><code>=EXCELAI.AI("Summarize", A1:A10)</code></li>
     </ul>
     <h3>Requirements</h3>
-    <p>LM Studio must be running on <code>localhost:1234</code> with CORS enabled.</p>
+    <p>LM Studio must be running on <code>127.0.0.1:1234</code> with CORS enabled.</p>
 </body>
 
 </html>

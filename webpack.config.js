@@ -92,6 +92,15 @@ module.exports = async (env, options) => {
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
+      proxy: [
+        {
+          context: ["/lmstudio"],
+          target: "http://127.0.0.1:1234",
+          pathRewrite: { "^/lmstudio": "" },
+          secure: false,
+          changeOrigin: true,
+        },
+      ],
       server: {
         type: "https",
         options: env.WEBPACK_BUILD || options.https !== undefined ? options.https : await getHttpsOptions(),
