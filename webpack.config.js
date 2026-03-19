@@ -95,7 +95,7 @@ module.exports = async (env, options) => {
       proxy: [
         {
           context: ["/lmstudio"],
-          target: "http://127.0.0.1:1234",
+          target: process.env.LMSTUDIO_URL || "http://127.0.0.1:1234",
           pathRewrite: { "^/lmstudio": "" },
           secure: false,
           changeOrigin: true,

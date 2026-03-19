@@ -2,7 +2,7 @@
 
 import * as cache from "../services/cache";
 import * as queue from "../services/queue";
-import { complete } from "../services/lmstudio";
+import { complete } from "../services/ai";
 
 const MAX_CELL_LENGTH = 32767;
 

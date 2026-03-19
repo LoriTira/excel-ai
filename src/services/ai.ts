@@ -1,6 +1,5 @@
-// Requests go through the webpack dev server proxy (/lmstudio -> http://127.0.0.1:1234)
-// This avoids mixed-content blocking (HTTPS add-in -> HTTP LM Studio).
-const BASE_URL = "/lmstudio";
+import { getSettings } from "./settings";
+
 const DEFAULT_TEMPERATURE = 0.3;
 const DEFAULT_MAX_TOKENS = 512;
 const REQUEST_TIMEOUT_MS = 30000;
@@ -21,6 +20,23 @@ interface ChatCompletionResponse {
 }
 
 export async function complete(prompt: string, model?: string): Promise<string> {
+  const settings = getSettings();
+
+  let baseUrl: string;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+  if (settings.provider === "api") {
+    baseUrl = settings.apiEndpoint;
+    if (settings.apiKey) {
+      headers["Authorization"] = `Bearer ${settings.apiKey}`;
+    }
+  } else {
+    // Local: use webpack dev-server proxy which forwards to the configured address
+    baseUrl = "/lmstudio";
+  }
+
+  const resolvedModel = model || (settings.provider === "api" ? settings.apiModel : undefined);
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -31,11 +47,11 @@ export async function complete(prompt: string, model?: string): Promise<string> 
 
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/v1/chat/completions`, {
+    response = await fetch(`${baseUrl}/v1/chat/completions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
-        ...(model ? { model } : {}),
+        ...(resolvedModel ? { model: resolvedModel } : {}),
         messages,
         temperature: DEFAULT_TEMPERATURE,
         max_tokens: DEFAULT_MAX_TOKENS,
@@ -46,7 +62,10 @@ export async function complete(prompt: string, model?: string): Promise<string> 
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new Error("Request timed out (30s)");
     }
-    throw new Error("LM Studio not running at 127.0.0.1:1234");
+    if (settings.provider === "api") {
+      throw new Error(`Cannot reach API at ${settings.apiEndpoint}`);
+    }
+    throw new Error(`LM Studio not running at ${settings.localAddress}`);
   } finally {
     clearTimeout(timeout);
   }

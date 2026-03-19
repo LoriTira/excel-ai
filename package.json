@@ -20,7 +20,8 @@
     "start": "office-addin-debugging start manifest.xml",
     "stop": "office-addin-debugging stop manifest.xml",
     "validate": "office-addin-manifest validate manifest.xml",
-    "watch": "webpack --mode development --watch"
+    "watch": "webpack --mode development --watch",
+    "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "core-js": "^3.36.0",
@@ -35,6 +36,7 @@
     "@types/office-runtime": "^1.0.35",
     "acorn": "^8.5.0",
     "babel-loader": "^9.1.3",
+    "canvas": "^3.2.1",
     "copy-webpack-plugin": "^12.0.2",
     "custom-functions-metadata-plugin": "^2.1.3",
     "eslint-plugin-office-addins": "^4.0.3",

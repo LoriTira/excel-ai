@@ -53,6 +53,85 @@
         li {
             margin-bottom: 8px;
         }
+        hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 20px 0;
+        }
+        body.dark-mode hr {
+            border-top-color: #444;
+        }
+        label {
+            display: block;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 4px;
+            margin-top: 12px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="password"] {
+            background: #2d2d2d;
+            color: #f0f0f0;
+            border-color: #555;
+        }
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 6px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 400;
+            margin: 0;
+        }
+        .settings-panel {
+            display: none;
+        }
+        .settings-panel.active {
+            display: block;
+        }
+        #save-btn {
+            margin-top: 16px;
+            padding: 6px 16px;
+            border: none;
+            border-radius: 4px;
+            background: #1a6b37;
+            color: #fff;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        #save-btn:hover {
+            background: #15562d;
+        }
+        body.dark-mode #save-btn {
+            background: #50d080;
+            color: #1e1e1e;
+        }
+        body.dark-mode #save-btn:hover {
+            background: #45b870;
+        }
+        #status-msg {
+            margin-top: 8px;
+            font-size: 0.82em;
+            min-height: 1.2em;
+        }
+        .status-ok { color: #1a6b37; }
+        .status-err { color: #c0392b; }
+        body.dark-mode .status-ok { color: #50d080; }
+        body.dark-mode .status-err { color: #e74c3c; }
     </style>
     <script>
         function applyTheme() {
@@ -81,8 +160,33 @@
         <li><code>=EXCELAI.AI("Classify sentiment", A1)</code></li>
         <li><code>=EXCELAI.AI("Summarize", A1:A10)</code></li>
     </ul>
-    <h3>Requirements</h3>
-    <p>LM Studio must be running on <code>127.0.0.1:1234</code> with CORS enabled.</p>
+    <hr />
+
+    <h3>Settings</h3>
+
+    <div class="radio-group">
+        <label><input type="radio" name="provider" value="local" checked /> Local (LM Studio)</label>
+        <label><input type="radio" name="provider" value="api" /> External API</label>
+    </div>
+
+    <div id="local-panel" class="settings-panel active">
+        <label for="local-address">Server address</label>
+        <input type="text" id="local-address" value="http://127.0.0.1:1234" placeholder="http://127.0.0.1:1234" />
+    </div>
+
+    <div id="api-panel" class="settings-panel">
+        <label for="api-endpoint">API Endpoint</label>
+        <input type="text" id="api-endpoint" placeholder="https://api.openai.com" />
+
+        <label for="api-key">API Key</label>
+        <input type="password" id="api-key" placeholder="sk-..." />
+
+        <label for="api-model">Model</label>
+        <input type="text" id="api-model" placeholder="gpt-4o-mini" />
+    </div>
+
+    <button id="save-btn">Save</button>
+    <div id="status-msg"></div>
 </body>
 
 </html>
