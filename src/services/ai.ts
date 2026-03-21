@@ -31,8 +31,9 @@ export async function complete(prompt: string, model?: string): Promise<string> 
       headers["Authorization"] = `Bearer ${settings.apiKey}`;
     }
   } else {
-    // Local: use webpack dev-server proxy which forwards to the configured address
-    baseUrl = "/lmstudio";
+    // Local mode: use the dev-server proxy when running locally, otherwise call LM Studio directly
+    const isDevServer = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    baseUrl = isDevServer ? "/lmstudio" : settings.localAddress;
   }
 
   const resolvedModel = model || (settings.provider === "api" ? settings.apiModel : undefined);

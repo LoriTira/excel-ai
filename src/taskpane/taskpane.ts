@@ -34,7 +34,7 @@ function loadSettingsIntoForm(): void {
   (document.getElementById("api-model") as HTMLInputElement).value = s.apiModel;
 }
 
-function handleSave(): void {
+async function handleSave(): Promise<void> {
   const provider = document.querySelector<HTMLInputElement>('input[name="provider"]:checked')!.value as "local" | "api";
   const localAddress = (document.getElementById("local-address") as HTMLInputElement).value.trim();
   const apiEndpoint = (document.getElementById("api-endpoint") as HTMLInputElement).value.trim();
@@ -55,7 +55,31 @@ function handleSave(): void {
   const settings: ProviderSettings = { provider, localAddress, apiEndpoint, apiKey, apiModel };
   saveSettings(settings);
   cache.clear();
+
+  // When using local provider from a hosted add-in, test the connection
+  if (provider === "local" && !isDevServer()) {
+    showStatus("Saved. Testing connection\u2026");
+    const ok = await testLocalConnection(localAddress);
+    if (!ok) {
+      showStatus("Saved, but cannot reach LM Studio. Check troubleshooting tips below.", true);
+      return;
+    }
+  }
+
   showStatus("Settings saved.");
+}
+
+function isDevServer(): boolean {
+  return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+}
+
+async function testLocalConnection(address: string): Promise<boolean> {
+  try {
+    const resp = await fetch(`${address}/v1/models`, { signal: AbortSignal.timeout(5000) });
+    return resp.ok;
+  } catch {
+    return false;
+  }
 }
 
 function showStatus(msg: string, isError = false): void {

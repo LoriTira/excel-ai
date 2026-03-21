@@ -172,6 +172,14 @@
     <div id="local-panel" class="settings-panel active">
         <label for="local-address">Server address</label>
         <input type="text" id="local-address" value="http://127.0.0.1:1234" placeholder="http://127.0.0.1:1234" />
+        <details id="local-help" style="margin-top:8px; font-size:0.82em;">
+            <summary style="cursor:pointer; color:#666;">Troubleshooting</summary>
+            <ul style="margin-top:4px; padding-left:16px; color:#666;">
+                <li>Make sure CORS is enabled in LM Studio (Settings &gt; Enable CORS)</li>
+                <li>If you have connection issues, try enabling HTTPS in LM Studio</li>
+                <li>On some platforms, the browser may block connections to local servers from a hosted add-in &mdash; use Desktop Excel for best results</li>
+            </ul>
+        </details>
     </div>
 
     <div id="api-panel" class="settings-panel">
