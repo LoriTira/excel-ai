@@ -98,6 +98,17 @@ module.exports = async (env, options) => {
             to: "uninstall.ps1",
           },
           {
+            from: "manifest.xml",
+            to: "manifest-local.xml",
+            transform(content) {
+              const urlLocal = "https://127.0.0.1:11435/";
+              // Replace both dev and prod URLs with local server URL
+              return content.toString()
+                .replace(new RegExp(urlDev + "(?:public/)?", "g"), urlLocal)
+                .replace(new RegExp(urlProd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g"), urlLocal);
+            },
+          },
+          {
             from: "src/install/install.html",
             to: "install.html",
           },
@@ -122,9 +133,8 @@ module.exports = async (env, options) => {
       },
       proxy: [
         {
-          context: ["/ollama"],
+          context: ["/v1", "/api"],
           target: process.env.OLLAMA_URL || "http://127.0.0.1:11434",
-          pathRewrite: { "^/ollama": "" },
           secure: false,
           changeOrigin: true,
         },

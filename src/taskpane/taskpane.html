@@ -170,21 +170,22 @@
     </div>
 
     <div id="local-panel" class="settings-panel active">
-        <label for="local-address">Server address</label>
-        <input type="text" id="local-address" value="http://127.0.0.1:11434" placeholder="http://127.0.0.1:11434" />
-
         <label for="local-model">Model</label>
         <input type="text" id="local-model" value="qwen2.5:1.5b" placeholder="qwen2.5:1.5b" />
+
+        <details style="margin-top:8px; font-size:0.82em;">
+            <summary style="cursor:pointer; color:#666;">Advanced</summary>
+            <label for="local-address">Custom server address (leave empty for default)</label>
+            <input type="text" id="local-address" value="" placeholder="https://remote-ollama:11435" />
+        </details>
 
         <details id="local-help" style="margin-top:8px; font-size:0.82em;">
             <summary style="cursor:pointer; color:#666;">Troubleshooting</summary>
             <ul style="margin-top:4px; padding-left:16px; color:#666;">
                 <li>Make sure Ollama is running: <code>ollama serve</code></li>
-                <li>Pull a model if you don't have one: <code>ollama pull qwen2.5:1.5b</code></li>
-                <li>Allow connections from the add-in (CORS):<br/>
-                    Mac: <code>launchctl setenv OLLAMA_ORIGINS "*"</code> then restart Ollama<br/>
-                    Windows: set env var <code>OLLAMA_ORIGINS=*</code> then restart Ollama</li>
+                <li>Pull a model: <code>ollama pull qwen2.5:1.5b</code></li>
                 <li>List available models: <code>ollama list</code></li>
+                <li>Re-run the install script to fix everything automatically</li>
             </ul>
         </details>
     </div>

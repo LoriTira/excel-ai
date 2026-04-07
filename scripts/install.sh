@@ -6,6 +6,11 @@ BASE_URL="https://loritira.github.io/excel-ai"
 DEFAULT_MODEL="qwen2.5:1.5b"
 WEF_DIR="$HOME/Library/Containers/com.microsoft.Excel/Data/Documents/wef"
 CONTAINER_DIR="$HOME/Library/Containers/com.microsoft.Excel"
+OLLAMA_DIR="$HOME/.ollama"
+INSTALL_DIR="$HOME/.excelai"
+PLIST_LABEL="com.excelai.server"
+PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
+SERVER_PORT=11435
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -16,47 +21,107 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "Installing Excel AI add-in..."
+echo "Installing Excel AI..."
 echo "Source: $BASE_URL"
 echo ""
 
-# --- 1. Install the Excel add-in manifest ---
+# --- 1. Check Excel has been opened ---
 
-# Check that Excel has been opened at least once
 if [ ! -d "$CONTAINER_DIR" ]; then
   echo "Error: Excel container directory not found."
   echo "Please open Microsoft Excel at least once, then run this script again."
   exit 1
 fi
 
-# Create wef directory if needed
-mkdir -p "$WEF_DIR"
-
-# Download the production manifest
-curl -fsSL "$BASE_URL/manifest.xml" -o "$WEF_DIR/$ADDIN_ID.manifest.xml"
-echo "[1/3] Excel add-in manifest installed."
-
 # --- 2. Install Ollama ---
 
 if command -v ollama &>/dev/null; then
-  echo "[2/3] Ollama is already installed."
+  echo "[1/5] Ollama is already installed."
 else
-  echo "[2/3] Installing Ollama..."
+  echo "[1/5] Installing Ollama..."
   curl -fsSL https://ollama.com/install.sh | sh
 fi
 
-# Allow the hosted add-in to connect to Ollama (CORS)
-launchctl setenv OLLAMA_ORIGINS "*"
+# --- 3. Generate TLS certificate ---
 
-# Restart Ollama so it picks up the new OLLAMA_ORIGINS setting
-pkill -f ollama 2>/dev/null || true
-sleep 1
-ollama serve &>/dev/null &
-sleep 2
+echo "[2/5] Setting up TLS certificate..."
+mkdir -p "$OLLAMA_DIR"
 
-# --- 3. Pull the default model ---
+if [ ! -f "$OLLAMA_DIR/cert.pem" ]; then
+  openssl req -x509 -newkey rsa:2048 \
+    -keyout "$OLLAMA_DIR/key.pem" \
+    -out "$OLLAMA_DIR/cert.pem" \
+    -days 3650 -nodes \
+    -subj "/CN=Excel AI Local" \
+    -addext "subjectAltName=IP:127.0.0.1" 2>/dev/null
 
-echo "[3/3] Pulling model '$DEFAULT_MODEL' (this may take a minute)..."
+  echo "  Adding certificate to system trust store (may require your password)..."
+  sudo security add-trusted-cert -d -r trustRoot \
+    -k /Library/Keychains/System.keychain "$OLLAMA_DIR/cert.pem"
+fi
+
+# --- 4. Download server binary and manifest ---
+
+echo "[3/5] Downloading Excel AI server..."
+mkdir -p "$INSTALL_DIR"
+
+# Detect architecture
+ARCH=$(uname -m)
+case "$ARCH" in
+  arm64|aarch64) BINARY="excelai-server-darwin-arm64" ;;
+  x86_64)        BINARY="excelai-server-darwin-amd64" ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+curl -fsSL "$BASE_URL/$BINARY" -o "$INSTALL_DIR/excelai-server"
+chmod +x "$INSTALL_DIR/excelai-server"
+
+# --- 5. Install manifest and configure auto-start ---
+
+echo "[4/5] Installing add-in manifest and auto-start..."
+mkdir -p "$WEF_DIR"
+curl -fsSL "$BASE_URL/manifest-local.xml" -o "$WEF_DIR/$ADDIN_ID.manifest.xml"
+
+# Clean up any old Ollama HTTPS config
+launchctl unsetenv OLLAMA_HOST 2>/dev/null || true
+
+# Create launchd plist for auto-start
+mkdir -p "$HOME/Library/LaunchAgents"
+cat > "$PLIST_PATH" << PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${PLIST_LABEL}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>${INSTALL_DIR}/excelai-server</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>${INSTALL_DIR}/server.log</string>
+    <key>StandardErrorPath</key>
+    <string>${INSTALL_DIR}/server.log</string>
+</dict>
+</plist>
+PLIST
+
+launchctl unload "$PLIST_PATH" 2>/dev/null || true
+launchctl load "$PLIST_PATH"
+
+# Ensure Ollama is running
+if ! pgrep -x ollama &>/dev/null; then
+  ollama serve &>/dev/null &
+  sleep 3
+fi
+
+# --- 6. Pull the default model ---
+
+echo "[5/5] Pulling model '$DEFAULT_MODEL' (this may take a minute)..."
 ollama pull "$DEFAULT_MODEL"
 
 echo ""
@@ -66,4 +131,5 @@ echo "Next steps:"
 echo "  1. Quit and reopen Microsoft Excel"
 echo "  2. Use =EXCELAI.AI(\"your prompt\") in any cell"
 echo ""
-echo "Ollama is running locally — your data never leaves your machine."
+echo "Everything runs locally — your data never leaves your machine."
+echo "Works offline after this initial setup."

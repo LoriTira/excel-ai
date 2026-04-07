@@ -44,10 +44,6 @@ async function handleSave(): Promise<void> {
   const apiModel = (document.getElementById("api-model") as HTMLInputElement).value.trim();
 
   // Validate
-  if (provider === "local" && !localAddress) {
-    showStatus("Server address is required.", true);
-    return;
-  }
   if (provider === "api") {
     if (!apiEndpoint) { showStatus("API endpoint is required.", true); return; }
     if (!apiKey) { showStatus("API key is required.", true); return; }
@@ -58,10 +54,11 @@ async function handleSave(): Promise<void> {
   saveSettings(settings);
   cache.clear();
 
-  // When using local provider from a hosted add-in, test the connection
-  if (provider === "local" && !isDevServer()) {
+  // Test connection to Ollama (works in both dev and production via proxy)
+  if (provider === "local") {
     showStatus("Saved. Testing connection\u2026");
-    const ok = await testLocalConnection(localAddress);
+    const testUrl = localAddress ? `${localAddress}/v1/models` : "/v1/models";
+    const ok = await testLocalConnection(testUrl);
     if (!ok) {
       showStatus("Saved, but cannot reach Ollama. Check troubleshooting tips below.", true);
       return;
@@ -71,13 +68,9 @@ async function handleSave(): Promise<void> {
   showStatus("Settings saved.");
 }
 
-function isDevServer(): boolean {
-  return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-}
-
-async function testLocalConnection(address: string): Promise<boolean> {
+async function testLocalConnection(url: string): Promise<boolean> {
   try {
-    const resp = await fetch(`${address}/v1/models`, { signal: AbortSignal.timeout(5000) });
+    const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
     return resp.ok;
   } catch {
     return false;

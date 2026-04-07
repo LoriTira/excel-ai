@@ -12,7 +12,7 @@ export interface ProviderSettings {
 export function getDefaults(): ProviderSettings {
   return {
     provider: "local",
-    localAddress: "http://127.0.0.1:11434",
+    localAddress: "",
     localModel: "qwen2.5:1.5b",
     apiEndpoint: "",
     apiKey: "",

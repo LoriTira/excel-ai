@@ -178,14 +178,13 @@
         <summary>After installation</summary>
         <ol class="steps">
             <li>Restart Excel (quit and reopen)</li>
-            <li>Click <strong>Excel AI</strong> in the Home tab to open settings</li>
-            <li>Choose your AI provider:
+            <li>Use <code>=EXCELAI.AI("your prompt")</code> in any cell &mdash; it works immediately with the local AI model</li>
+            <li>Click <strong>Excel AI</strong> in the Home tab to change settings:
                 <ul>
-                    <li><strong>Local (LM Studio)</strong> &mdash; run <a href="https://lmstudio.ai/" target="_blank">LM Studio</a> with a model loaded and CORS enabled</li>
-                    <li><strong>External API</strong> &mdash; enter your endpoint, API key, and model name</li>
+                    <li><strong>Local (Ollama)</strong> &mdash; change the model name (default: qwen2.5:1.5b)</li>
+                    <li><strong>External API</strong> &mdash; use OpenAI, Anthropic, or any compatible API instead</li>
                 </ul>
             </li>
-            <li>Use <code>=EXCELAI.AI("your prompt")</code> in any cell</li>
         </ol>
     </details>
 

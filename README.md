@@ -13,7 +13,7 @@ A Microsoft 365 Excel Add-in that adds a custom function `=AI()` powered by a lo
 
 ## Install
 
-One command installs the Excel add-in, Ollama, and a default AI model — no coding required.
+One command installs everything — the Excel add-in, Ollama, a default AI model, and a local HTTPS server. No coding required. Works offline after setup.
 
 ### macOS
 
@@ -37,14 +37,8 @@ irm https://loritira.github.io/excel-ai/install.ps1 | iex
 2. Use `=EXCELAI.AI("your prompt")` in any cell — it works immediately with the bundled local model
 
 To change settings, click **Excel AI** in the Home tab:
-- **Local (Ollama)**: Change the model or server address
+- **Local (Ollama)**: Change the model name
 - **External API**: Use OpenAI, Anthropic, or any OpenAI-compatible service instead
-
-### Manual install
-
-If you prefer not to use the script, download [`manifest.xml`](https://loritira.github.io/excel-ai/manifest.xml) and sideload it in Excel via **Insert** > **My Add-ins** > **Upload My Add-in**. You'll need to [install Ollama](https://ollama.com/download) separately.
-
-See the full [install page](https://loritira.github.io/excel-ai/install.html) for more details.
 
 ### Uninstall
 
@@ -52,12 +46,26 @@ See the full [install page](https://loritira.github.io/excel-ai/install.html) fo
 
 **Windows:** `irm https://loritira.github.io/excel-ai/uninstall.ps1 | iex`
 
+## How it works
+
+The install script sets up three components that run locally:
+
+1. **Ollama** — runs AI models on your machine (HTTP on port 11434)
+2. **Excel AI server** — a tiny Go binary (~8MB) that serves the add-in UI and proxies API requests to Ollama over HTTPS (port 11435)
+3. **The add-in manifest** — tells Excel where to load the add-in from
+
+```
+Excel Add-in (HTTPS) ←→ Excel AI server (HTTPS :11435) ←→ Ollama (HTTP :11434)
+```
+
+The HTTPS server is needed because Office Add-ins require HTTPS, but Ollama only speaks HTTP. The server bridges this gap while keeping everything local.
+
+All AI processing happens on your machine — no data is sent to any external service unless you explicitly configure an external API provider.
+
 ## Development
 
-For local development with Ollama proxy support:
-
 ```bash
-# Quick start (handles nvm automatically)
+# Quick start
 ./start.sh
 
 # Or manually
@@ -66,10 +74,12 @@ npm install
 npm start
 ```
 
-This builds the add-in and sideloads it into Excel with a local dev server. The dev server proxies `/ollama` to `localhost:11434` automatically.
+The webpack dev server proxies `/v1/*` to Ollama on `localhost:11434` automatically, so the same code works in both dev and production.
 
-## How it works
+### Building the server binary locally
 
-The `=AI()` custom function sends prompts to Ollama's OpenAI-compatible API (or an external API endpoint) and returns the response text into the cell. Results are cached in memory to avoid re-querying on recalculation.
-
-All AI processing happens locally on your machine by default — no data is sent to any external service unless you explicitly configure an external API provider.
+```bash
+npm run build
+rm -rf server/static && cp -r dist server/static
+cd server && go build -ldflags="-s -w" -o excelai-server .
+```
