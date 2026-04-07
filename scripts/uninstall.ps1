@@ -28,3 +28,6 @@ if (Test-Path $ManifestDir) {
 Write-Host ""
 Write-Host "Excel AI has been uninstalled." -ForegroundColor Green
 Write-Host "Restart Excel for the change to take effect."
+Write-Host ""
+Write-Host "Note: Ollama was not removed. To uninstall Ollama, use Add/Remove Programs or:"
+Write-Host "  winget uninstall Ollama.Ollama"

@@ -29,6 +29,7 @@ function loadSettingsIntoForm(): void {
 
   // Populate fields
   (document.getElementById("local-address") as HTMLInputElement).value = s.localAddress;
+  (document.getElementById("local-model") as HTMLInputElement).value = s.localModel;
   (document.getElementById("api-endpoint") as HTMLInputElement).value = s.apiEndpoint;
   (document.getElementById("api-key") as HTMLInputElement).value = s.apiKey;
   (document.getElementById("api-model") as HTMLInputElement).value = s.apiModel;
@@ -37,6 +38,7 @@ function loadSettingsIntoForm(): void {
 async function handleSave(): Promise<void> {
   const provider = document.querySelector<HTMLInputElement>('input[name="provider"]:checked')!.value as "local" | "api";
   const localAddress = (document.getElementById("local-address") as HTMLInputElement).value.trim();
+  const localModel = (document.getElementById("local-model") as HTMLInputElement).value.trim();
   const apiEndpoint = (document.getElementById("api-endpoint") as HTMLInputElement).value.trim();
   const apiKey = (document.getElementById("api-key") as HTMLInputElement).value.trim();
   const apiModel = (document.getElementById("api-model") as HTMLInputElement).value.trim();
@@ -52,7 +54,7 @@ async function handleSave(): Promise<void> {
     if (!apiModel) { showStatus("Model name is required.", true); return; }
   }
 
-  const settings: ProviderSettings = { provider, localAddress, apiEndpoint, apiKey, apiModel };
+  const settings: ProviderSettings = { provider, localAddress, localModel, apiEndpoint, apiKey, apiModel };
   saveSettings(settings);
   cache.clear();
 
@@ -61,7 +63,7 @@ async function handleSave(): Promise<void> {
     showStatus("Saved. Testing connection\u2026");
     const ok = await testLocalConnection(localAddress);
     if (!ok) {
-      showStatus("Saved, but cannot reach LM Studio. Check troubleshooting tips below.", true);
+      showStatus("Saved, but cannot reach Ollama. Check troubleshooting tips below.", true);
       return;
     }
   }

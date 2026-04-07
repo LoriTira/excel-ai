@@ -122,9 +122,9 @@ module.exports = async (env, options) => {
       },
       proxy: [
         {
-          context: ["/lmstudio"],
-          target: process.env.LMSTUDIO_URL || "http://127.0.0.1:1234",
-          pathRewrite: { "^/lmstudio": "" },
+          context: ["/ollama"],
+          target: process.env.OLLAMA_URL || "http://127.0.0.1:11434",
+          pathRewrite: { "^/ollama": "" },
           secure: false,
           changeOrigin: true,
         },

@@ -31,12 +31,12 @@ export async function complete(prompt: string, model?: string): Promise<string> 
       headers["Authorization"] = `Bearer ${settings.apiKey}`;
     }
   } else {
-    // Local mode: use the dev-server proxy when running locally, otherwise call LM Studio directly
+    // Local mode: use the dev-server proxy when running locally, otherwise call Ollama directly
     const isDevServer = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    baseUrl = isDevServer ? "/lmstudio" : settings.localAddress;
+    baseUrl = isDevServer ? "/ollama" : settings.localAddress;
   }
 
-  const resolvedModel = model || (settings.provider === "api" ? settings.apiModel : undefined);
+  const resolvedModel = model || (settings.provider === "api" ? settings.apiModel : settings.localModel) || undefined;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -66,7 +66,7 @@ export async function complete(prompt: string, model?: string): Promise<string> 
     if (settings.provider === "api") {
       throw new Error(`Cannot reach API at ${settings.apiEndpoint}`);
     }
-    throw new Error(`LM Studio not running at ${settings.localAddress}`);
+    throw new Error(`Ollama not running at ${settings.localAddress}`);
   } finally {
     clearTimeout(timeout);
   }

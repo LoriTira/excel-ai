@@ -17,3 +17,7 @@ fi
 echo ""
 echo "Excel AI has been uninstalled."
 echo "Restart Excel for the change to take effect."
+echo ""
+echo "Note: Ollama was not removed. To uninstall Ollama and its models:"
+echo "  sudo rm -f /usr/local/bin/ollama"
+echo "  rm -rf ~/.ollama"

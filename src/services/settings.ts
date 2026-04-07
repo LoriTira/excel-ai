@@ -3,6 +3,7 @@ const STORAGE_KEY = "excelai_settings";
 export interface ProviderSettings {
   provider: "local" | "api";
   localAddress: string;
+  localModel: string;
   apiEndpoint: string;
   apiKey: string;
   apiModel: string;
@@ -11,7 +12,8 @@ export interface ProviderSettings {
 export function getDefaults(): ProviderSettings {
   return {
     provider: "local",
-    localAddress: "http://127.0.0.1:1234",
+    localAddress: "http://127.0.0.1:11434",
+    localModel: "qwen2.5:1.5b",
     apiEndpoint: "",
     apiKey: "",
     apiModel: "",

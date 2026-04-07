@@ -165,19 +165,23 @@
     <h3>Settings</h3>
 
     <div class="radio-group">
-        <label><input type="radio" name="provider" value="local" checked /> Local (LM Studio)</label>
+        <label><input type="radio" name="provider" value="local" checked /> Local (Ollama)</label>
         <label><input type="radio" name="provider" value="api" /> External API</label>
     </div>
 
     <div id="local-panel" class="settings-panel active">
         <label for="local-address">Server address</label>
-        <input type="text" id="local-address" value="http://127.0.0.1:1234" placeholder="http://127.0.0.1:1234" />
+        <input type="text" id="local-address" value="http://127.0.0.1:11434" placeholder="http://127.0.0.1:11434" />
+
+        <label for="local-model">Model</label>
+        <input type="text" id="local-model" value="qwen2.5:1.5b" placeholder="qwen2.5:1.5b" />
+
         <details id="local-help" style="margin-top:8px; font-size:0.82em;">
             <summary style="cursor:pointer; color:#666;">Troubleshooting</summary>
             <ul style="margin-top:4px; padding-left:16px; color:#666;">
-                <li>Make sure CORS is enabled in LM Studio (Settings &gt; Enable CORS)</li>
-                <li>If you have connection issues, try enabling HTTPS in LM Studio</li>
-                <li>On some platforms, the browser may block connections to local servers from a hosted add-in &mdash; use Desktop Excel for best results</li>
+                <li>Make sure Ollama is running: <code>ollama serve</code></li>
+                <li>Pull a model if you don't have one: <code>ollama pull qwen2.5:1.5b</code></li>
+                <li>List available models: <code>ollama list</code></li>
             </ul>
         </details>
     </div>
