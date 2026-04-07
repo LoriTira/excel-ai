@@ -101,6 +101,14 @@ module.exports = async (env, options) => {
             from: "src/install/install.html",
             to: "install.html",
           },
+          {
+            from: "src/legal/privacy.html",
+            to: "privacy.html",
+          },
+          {
+            from: "src/legal/terms.html",
+            to: "terms.html",
+          },
         ],
       }),
     ],

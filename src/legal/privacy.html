@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy Policy - Excel AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #1a1a1a;
+            background: #ffffff;
+            line-height: 1.6;
+        }
+        h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 0;
+        }
+        h1 img { border-radius: 6px; }
+        h2 { margin-top: 28px; }
+        code {
+            background: #e8e8e8;
+            color: #1a6b37;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 28px 0;
+        }
+        a { color: #1a6b37; }
+        .effective { font-size: 0.85em; color: #666; }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.85em;
+            color: #666;
+        }
+        .footer a { margin-right: 16px; }
+
+        @media (prefers-color-scheme: dark) {
+            body { color: #f0f0f0; background: #1e1e1e; }
+            h1, h2, h3 { color: #ffffff; }
+            code { background: #2d2d2d; color: #50d080; }
+            hr { border-top-color: #444; }
+            a { color: #50d080; }
+            .effective { color: #aaa; }
+            .footer { border-top-color: #444; color: #aaa; }
+        }
+    </style>
+</head>
+
+<body>
+    <h1><img src="assets/logo-filled.png" width="40" height="40" alt="AI" /> Privacy Policy</h1>
+    <p class="effective">Effective date: April 7, 2026</p>
+
+    <p>Excel AI is an open-source Microsoft Excel add-in that provides AI-powered custom functions. This policy explains how data is handled when you use the add-in.</p>
+
+    <hr />
+
+    <h2>Data Collection</h2>
+    <p>Excel AI does <strong>not</strong> collect, store, or transmit any data to the add-in developer or any third party. There are no analytics, no telemetry, no cookies, and no tracking of any kind.</p>
+
+    <h2>Data You Send to AI Providers</h2>
+    <p>When you use the <code>=EXCELAI.AI()</code> function, your prompts and any cell data you reference are sent directly to the AI provider you have configured:</p>
+    <ul>
+        <li><strong>Local (LM Studio)</strong> &mdash; data is sent to a server running on your own machine. Nothing leaves your computer.</li>
+        <li><strong>External API</strong> &mdash; data is sent to the API endpoint you specify (e.g., OpenAI, Anthropic). Your data is subject to that provider's privacy policy.</li>
+    </ul>
+    <p>The add-in acts as a direct client &mdash; requests go straight from your browser to the AI provider. No data passes through any intermediary server.</p>
+
+    <h2>Settings and API Keys</h2>
+    <p>Your configuration (provider choice, server address, API endpoint, API key, and model name) is stored in your browser's <code>localStorage</code> on your device only. This data is never transmitted anywhere.</p>
+
+    <h2>Caching</h2>
+    <p>AI responses are cached in memory while Excel is open to avoid duplicate requests. This cache is not written to disk and is discarded when you close Excel.</p>
+
+    <h2>Open Source</h2>
+    <p>Excel AI is open source. You can review the complete source code to verify these practices at <a href="https://github.com/LoriTira/excel-ai" target="_blank">github.com/LoriTira/excel-ai</a>.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>If this policy is updated, the new version will be posted at this URL with a revised effective date.</p>
+
+    <h2>Contact</h2>
+    <p>For questions about this policy, contact <a href="mailto:lorenzo@promptcell.onmicrosoft.com">lorenzo@promptcell.onmicrosoft.com</a>.</p>
+
+    <div class="footer">
+        <a href="terms.html">Terms of Service</a>
+        <a href="install.html">Install</a>
+        <a href="https://github.com/LoriTira/excel-ai" target="_blank">GitHub</a>
+    </div>
+</body>
+
+</html>
