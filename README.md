@@ -40,6 +40,30 @@ To change settings, click **Excel AI** in the Home tab:
 - **Local (Ollama)**: Change the model name
 - **External API**: Use OpenAI, Anthropic, or any OpenAI-compatible service instead
 
+### Stop / restart
+
+**macOS:**
+```bash
+# Stop
+launchctl unload ~/Library/LaunchAgents/com.excelai.server.plist
+pkill ollama
+
+# Restart
+launchctl load ~/Library/LaunchAgents/com.excelai.server.plist
+ollama serve &
+```
+
+**Windows (PowerShell):**
+```powershell
+# Stop
+Stop-ScheduledTask -TaskName "ExcelAI-Server"; Stop-Process -Name "excelai-server" -Force
+Stop-Process -Name "ollama" -Force
+
+# Restart
+Start-ScheduledTask -TaskName "ExcelAI-Server"
+Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
+```
+
 ### Uninstall
 
 **macOS:** `curl -fsSL https://loritira.github.io/excel-ai/uninstall.sh | bash`
