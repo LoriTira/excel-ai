@@ -55,6 +55,8 @@ export async function complete(prompt: string, model?: string): Promise<string> 
         messages,
         temperature: DEFAULT_TEMPERATURE,
         max_tokens: DEFAULT_MAX_TOKENS,
+        // Limit context window to reduce RAM usage (~1.5 GB vs 5+ GB at default 128K)
+        ...(settings.provider === "local" ? { num_ctx: 2048 } : {}),
       }),
       signal: controller.signal,
     });

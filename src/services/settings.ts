@@ -13,7 +13,7 @@ export function getDefaults(): ProviderSettings {
   return {
     provider: "local",
     localAddress: "",
-    localModel: "qwen2.5:1.5b",
+    localModel: "llama3.2:1b",
     apiEndpoint: "",
     apiKey: "",
     apiModel: "",

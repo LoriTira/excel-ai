@@ -3,7 +3,7 @@ set -e
 
 ADDIN_ID="5cc82bad-f723-4c10-82ba-f135772ad04f"
 BASE_URL="https://loritira.github.io/excel-ai"
-DEFAULT_MODEL="qwen2.5:1.5b"
+DEFAULT_MODEL="llama3.2:1b"
 WEF_DIR="$HOME/Library/Containers/com.microsoft.Excel/Data/Documents/wef"
 CONTAINER_DIR="$HOME/Library/Containers/com.microsoft.Excel"
 OLLAMA_DIR="$HOME/.ollama"
