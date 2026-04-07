@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
 
 $AddinId = "5cc82bad-f723-4c10-82ba-f135772ad04f"
 $InstallDir = Join-Path $env:LOCALAPPDATA "ExcelAI"
