@@ -11,16 +11,46 @@ A Microsoft 365 Excel Add-in that adds a custom function `=AI()` powered by a lo
 =EXCELAI.AI("Translate to Spanish", A1, "qwen2.5-7b")
 ```
 
-## Install (no coding required)
+## Install
 
-The add-in is hosted on GitHub Pages. To use it:
+The add-in is hosted on GitHub Pages. Install with a single command — no coding required.
 
-1. Download [`manifest.xml`](https://github.com/LoriTira/excel-ai/releases/latest) from the latest release
-2. Open Excel > **Insert** > **My Add-ins** > **Upload My Add-in** > browse to `manifest.xml`
-3. Open the **Excel AI** taskpane and configure your AI provider:
+### macOS
+
+Open **Terminal** and paste:
+
+```bash
+curl -fsSL https://loritira.github.io/excel-ai/install.sh | bash
+```
+
+### Windows
+
+Open **PowerShell** and paste:
+
+```powershell
+irm https://loritira.github.io/excel-ai/install.ps1 | iex
+```
+
+### After installation
+
+1. Quit and reopen Excel
+2. Click **Excel AI** in the Home tab to open settings
+3. Configure your AI provider:
    - **Local (LM Studio)**: Have [LM Studio](https://lmstudio.ai/) running with a model loaded, server started, and CORS enabled
    - **External API**: Enter your API endpoint, key, and model name (works with OpenAI, Anthropic, or any OpenAI-compatible service)
 4. Use `=EXCELAI.AI("your prompt")` in any cell
+
+### Manual install
+
+If you prefer not to use the script, download [`manifest.xml`](https://loritira.github.io/excel-ai/manifest.xml) and sideload it in Excel via **Insert** > **My Add-ins** > **Upload My Add-in**.
+
+See the full [install page](https://loritira.github.io/excel-ai/install.html) for more details.
+
+### Uninstall
+
+**macOS:** `curl -fsSL https://loritira.github.io/excel-ai/uninstall.sh | bash`
+
+**Windows:** `irm https://loritira.github.io/excel-ai/uninstall.ps1 | iex`
 
 ## Development
 

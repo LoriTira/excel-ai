@@ -81,6 +81,26 @@ module.exports = async (env, options) => {
               }
             },
           },
+          {
+            from: "scripts/install.sh",
+            to: "install.sh",
+          },
+          {
+            from: "scripts/install.ps1",
+            to: "install.ps1",
+          },
+          {
+            from: "scripts/uninstall.sh",
+            to: "uninstall.sh",
+          },
+          {
+            from: "scripts/uninstall.ps1",
+            to: "uninstall.ps1",
+          },
+          {
+            from: "src/install/install.html",
+            to: "install.html",
+          },
         ],
       }),
     ],

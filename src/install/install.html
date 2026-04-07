@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Install Excel AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+        h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 0;
+        }
+        h1 img { border-radius: 6px; }
+        code {
+            background: #e8e8e8;
+            color: #1a6b37;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 28px 0;
+        }
+        .cmd-block {
+            position: relative;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            overflow-x: auto;
+            word-break: break-all;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 10px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #2d2d2d;
+            color: #d4d4d4;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .copy-btn:hover { background: #3d3d3d; }
+        .platform-section { display: none; }
+        .platform-section.active { display: block; }
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 8px 20px;
+            border: 1px solid #ccc;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .tab:first-child { border-radius: 6px 0 0 6px; }
+        .tab:last-child { border-radius: 0 6px 6px 0; }
+        .tab.active {
+            background: #1a6b37;
+            color: #fff;
+            border-color: #1a6b37;
+        }
+        .steps { padding-left: 20px; }
+        .steps li { margin-bottom: 10px; }
+        details {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #555;
+        }
+        details ul { padding-left: 20px; }
+        .download-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            background: #1a6b37;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .download-link:hover { background: #15562d; }
+
+        @media (prefers-color-scheme: dark) {
+            body { color: #f0f0f0; background: #1e1e1e; }
+            h1, h2, h3 { color: #ffffff; }
+            code { background: #2d2d2d; color: #50d080; }
+            hr { border-top-color: #444; }
+            .tab { background: #2d2d2d; border-color: #555; color: #f0f0f0; }
+            .tab.active { background: #50d080; color: #1e1e1e; border-color: #50d080; }
+            summary { color: #aaa; }
+            .download-link { background: #50d080; color: #1e1e1e; }
+            .download-link:hover { background: #45b870; }
+        }
+    </style>
+</head>
+
+<body>
+    <h1><img src="assets/logo-filled.png" width="40" height="40" alt="AI" /> Install Excel AI</h1>
+    <p>Add <code>=EXCELAI.AI("your prompt")</code> to any Excel cell, powered by local or cloud AI.</p>
+
+    <hr />
+
+    <div class="tab-bar">
+        <div class="tab active" data-platform="mac">macOS</div>
+        <div class="tab" data-platform="win">Windows</div>
+    </div>
+
+    <div id="mac" class="platform-section active">
+        <h3>Quick Install</h3>
+        <p>Open <strong>Terminal</strong> and paste:</p>
+        <div class="cmd-block">
+            <button class="copy-btn" data-target="mac-cmd">Copy</button>
+            <span id="mac-cmd">curl -fsSL https://loritira.github.io/excel-ai/install.sh | bash</span>
+        </div>
+
+        <h3>Uninstall</h3>
+        <div class="cmd-block">
+            <button class="copy-btn" data-target="mac-uninstall">Copy</button>
+            <span id="mac-uninstall">curl -fsSL https://loritira.github.io/excel-ai/uninstall.sh | bash</span>
+        </div>
+    </div>
+
+    <div id="win" class="platform-section">
+        <h3>Quick Install</h3>
+        <p>Open <strong>PowerShell</strong> and paste:</p>
+        <div class="cmd-block">
+            <button class="copy-btn" data-target="win-cmd">Copy</button>
+            <span id="win-cmd">irm https://loritira.github.io/excel-ai/install.ps1 | iex</span>
+        </div>
+
+        <h3>Uninstall</h3>
+        <div class="cmd-block">
+            <button class="copy-btn" data-target="win-uninstall">Copy</button>
+            <span id="win-uninstall">irm https://loritira.github.io/excel-ai/uninstall.ps1 | iex</span>
+        </div>
+    </div>
+
+    <hr />
+
+    <details>
+        <summary>Manual install (no terminal required)</summary>
+        <ol class="steps">
+            <li><a class="download-link" href="manifest.xml" download>Download manifest.xml</a></li>
+            <li>Open Excel</li>
+            <li>Go to <strong>Insert</strong> &gt; <strong>My Add-ins</strong> &gt; <strong>Upload My Add-in</strong></li>
+            <li>Browse to the downloaded <code>manifest.xml</code></li>
+            <li>Click <strong>Upload</strong></li>
+        </ol>
+    </details>
+
+    <details>
+        <summary>After installation</summary>
+        <ol class="steps">
+            <li>Restart Excel (quit and reopen)</li>
+            <li>Click <strong>Excel AI</strong> in the Home tab to open settings</li>
+            <li>Choose your AI provider:
+                <ul>
+                    <li><strong>Local (LM Studio)</strong> &mdash; run <a href="https://lmstudio.ai/" target="_blank">LM Studio</a> with a model loaded and CORS enabled</li>
+                    <li><strong>External API</strong> &mdash; enter your endpoint, API key, and model name</li>
+                </ul>
+            </li>
+            <li>Use <code>=EXCELAI.AI("your prompt")</code> in any cell</li>
+        </ol>
+    </details>
+
+    <details>
+        <summary>For forks / custom hosting</summary>
+        <p>If you host the add-in at a different URL, pass it to the install script:</p>
+        <div class="cmd-block" style="margin-top:8px;">
+            <span>curl -fsSL https://your-site.com/install.sh | bash -s -- --url https://your-site.com</span>
+        </div>
+        <p style="margin-top:12px;">On Windows:</p>
+        <div class="cmd-block">
+            <span>irm https://your-site.com/install.ps1 -OutFile install.ps1; .\install.ps1 -BaseUrl https://your-site.com</span>
+        </div>
+    </details>
+
+    <script>
+        // Platform detection
+        (function() {
+            var ua = navigator.userAgent || navigator.platform || "";
+            var isMac = /Mac|iPhone|iPad/.test(ua);
+            var isWin = /Win/.test(ua);
+
+            if (isWin) {
+                switchTab("win");
+            } else {
+                switchTab("mac");
+            }
+        })();
+
+        // Tab switching
+        document.querySelectorAll(".tab").forEach(function(tab) {
+            tab.addEventListener("click", function() {
+                switchTab(this.getAttribute("data-platform"));
+            });
+        });
+
+        function switchTab(platform) {
+            document.querySelectorAll(".tab").forEach(function(t) {
+                t.classList.toggle("active", t.getAttribute("data-platform") === platform);
+            });
+            document.querySelectorAll(".platform-section").forEach(function(s) {
+                s.classList.toggle("active", s.id === platform);
+            });
+        }
+
+        // Copy buttons
+        document.querySelectorAll(".copy-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                var target = document.getElementById(this.getAttribute("data-target"));
+                if (target) {
+                    navigator.clipboard.writeText(target.textContent.trim()).then(function() {
+                        btn.textContent = "Copied!";
+                        setTimeout(function() { btn.textContent = "Copy"; }, 2000);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
