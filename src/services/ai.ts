@@ -6,6 +6,9 @@ const REQUEST_TIMEOUT_MS = 30000;
 
 const SYSTEM_PROMPT = "You are a helpful assistant embedded in Excel. Give concise answers suitable for spreadsheet cells.";
 
+// Cache the auto-detected local model name
+let cachedLocalModel: string | undefined;
+
 interface ChatMessage {
   role: "system" | "user";
   content: string;
@@ -17,6 +20,24 @@ interface ChatCompletionResponse {
       content: string;
     };
   }>;
+}
+
+interface ModelsResponse {
+  data: Array<{ id: string }>;
+}
+
+/** Detect the first model available in Ollama. */
+async function detectLocalModel(baseUrl: string): Promise<string | undefined> {
+  if (cachedLocalModel) return cachedLocalModel;
+  try {
+    const resp = await fetch(`${baseUrl}/v1/models`, { signal: AbortSignal.timeout(3000) });
+    if (!resp.ok) return undefined;
+    const data: ModelsResponse = await resp.json();
+    cachedLocalModel = data?.data?.[0]?.id;
+    return cachedLocalModel;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function complete(prompt: string, model?: string): Promise<string> {
@@ -35,7 +56,15 @@ export async function complete(prompt: string, model?: string): Promise<string> 
     baseUrl = settings.localAddress || "";
   }
 
-  const resolvedModel = model || (settings.provider === "api" ? settings.apiModel : settings.localModel) || undefined;
+  let resolvedModel: string | undefined;
+  if (model) {
+    resolvedModel = model;
+  } else if (settings.provider === "api") {
+    resolvedModel = settings.apiModel;
+  } else {
+    // Auto-detect whatever model Ollama has loaded
+    resolvedModel = await detectLocalModel(baseUrl);
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

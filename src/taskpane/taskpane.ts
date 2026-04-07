@@ -5,6 +5,7 @@ import * as cache from "../services/cache";
 
 Office.onReady(() => {
   loadSettingsIntoForm();
+  detectLocalModel();
 
   // Provider radio toggle
   document.querySelectorAll<HTMLInputElement>('input[name="provider"]').forEach((radio) => {
@@ -29,16 +30,34 @@ function loadSettingsIntoForm(): void {
 
   // Populate fields
   (document.getElementById("local-address") as HTMLInputElement).value = s.localAddress;
-  (document.getElementById("local-model") as HTMLInputElement).value = s.localModel;
   (document.getElementById("api-endpoint") as HTMLInputElement).value = s.apiEndpoint;
   (document.getElementById("api-key") as HTMLInputElement).value = s.apiKey;
   (document.getElementById("api-model") as HTMLInputElement).value = s.apiModel;
 }
 
+async function detectLocalModel(): Promise<void> {
+  const s = getSettings();
+  const baseUrl = s.localAddress || "";
+  const el = document.getElementById("local-model-info")!;
+  try {
+    const resp = await fetch(`${baseUrl}/v1/models`, { signal: AbortSignal.timeout(3000) });
+    if (!resp.ok) throw new Error();
+    const data = await resp.json();
+    const models: string[] = (data?.data || []).map((m: { id: string }) => m.id);
+    if (models.length > 0) {
+      el.innerHTML = `Using <strong>${models[0]}</strong>` +
+        (models.length > 1 ? ` <span style="color:#999">(+${models.length - 1} more available)</span>` : "");
+    } else {
+      el.innerHTML = 'No models found. Run <code>ollama pull llama3.2:1b</code>';
+    }
+  } catch {
+    el.innerHTML = 'Cannot reach Ollama. Check troubleshooting below.';
+  }
+}
+
 async function handleSave(): Promise<void> {
   const provider = document.querySelector<HTMLInputElement>('input[name="provider"]:checked')!.value as "local" | "api";
   const localAddress = (document.getElementById("local-address") as HTMLInputElement).value.trim();
-  const localModel = (document.getElementById("local-model") as HTMLInputElement).value.trim();
   const apiEndpoint = (document.getElementById("api-endpoint") as HTMLInputElement).value.trim();
   const apiKey = (document.getElementById("api-key") as HTMLInputElement).value.trim();
   const apiModel = (document.getElementById("api-model") as HTMLInputElement).value.trim();
@@ -50,7 +69,7 @@ async function handleSave(): Promise<void> {
     if (!apiModel) { showStatus("Model name is required.", true); return; }
   }
 
-  const settings: ProviderSettings = { provider, localAddress, localModel, apiEndpoint, apiKey, apiModel };
+  const settings: ProviderSettings = { provider, localAddress, apiEndpoint, apiKey, apiModel };
   saveSettings(settings);
   cache.clear();
 
@@ -63,6 +82,7 @@ async function handleSave(): Promise<void> {
       showStatus("Saved, but cannot reach Ollama. Check troubleshooting tips below.", true);
       return;
     }
+    detectLocalModel();
   }
 
   showStatus("Settings saved.");

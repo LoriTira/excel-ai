@@ -26,7 +26,7 @@ function serializeContext(context: unknown[][] | undefined): string {
  * @customfunction
  * @param {string} prompt The instruction or question to send to the AI model.
  * @param [context] A cell or range whose values are included as context.
- * @param [model] Override the default model loaded in LM Studio.
+ * @param [model] Override the auto-detected Ollama model (e.g. "gemma3:4b").
  * @returns The model's response.
  */
 export async function ai(prompt: string, context?: unknown[][], model?: string): Promise<string> {

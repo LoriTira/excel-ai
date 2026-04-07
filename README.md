@@ -37,7 +37,7 @@ irm https://loritira.github.io/excel-ai/install.ps1 | iex
 2. Use `=EXCELAI.AI("your prompt")` in any cell — it works immediately with the bundled local model
 
 To change settings, click **Excel AI** in the Home tab:
-- **Local (Ollama)**: Change the model name
+- **Local (Ollama)**: Auto-detects whichever model is loaded. Override per cell with `=EXCELAI.AI("prompt", , "gemma3:4b")`
 - **External API**: Use OpenAI, Anthropic, or any OpenAI-compatible service instead
 
 ### Stop / restart

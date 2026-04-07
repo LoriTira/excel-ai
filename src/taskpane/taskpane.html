@@ -170,8 +170,9 @@
     </div>
 
     <div id="local-panel" class="settings-panel active">
-        <label for="local-model">Model</label>
-        <input type="text" id="local-model" value="llama3.2:1b" placeholder="llama3.2:1b" />
+        <p id="local-model-info" style="font-size:0.85em; color:#666; margin-top:8px;">
+            Detecting model...
+        </p>
 
         <details style="margin-top:8px; font-size:0.82em;">
             <summary style="cursor:pointer; color:#666;">Advanced</summary>
@@ -185,6 +186,7 @@
                 <li>Make sure Ollama is running: <code>ollama serve</code></li>
                 <li>Pull a model: <code>ollama pull llama3.2:1b</code></li>
                 <li>List available models: <code>ollama list</code></li>
+                <li>Override per cell: <code>=EXCELAI.AI("prompt", , "gemma3:4b")</code></li>
                 <li>Re-run the install script to fix everything automatically</li>
             </ul>
         </details>
