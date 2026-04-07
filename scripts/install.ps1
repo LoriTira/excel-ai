@@ -48,6 +48,16 @@ if ($ollamaCmd) {
     $env:Path = "$machinePath;$userPath"
 }
 
+# Allow the hosted add-in to connect to Ollama (CORS)
+[System.Environment]::SetEnvironmentVariable("OLLAMA_ORIGINS", "*", "User")
+$env:OLLAMA_ORIGINS = "*"
+
+# Restart Ollama so it picks up the new OLLAMA_ORIGINS setting
+Stop-Process -Name "ollama*" -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
+Start-Sleep -Seconds 2
+
 # --- 3. Pull the default model ---
 
 Write-Host "[3/3] Pulling model '$Model' (this may take a minute)..."

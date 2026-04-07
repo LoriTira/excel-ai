@@ -45,6 +45,15 @@ else
   curl -fsSL https://ollama.com/install.sh | sh
 fi
 
+# Allow the hosted add-in to connect to Ollama (CORS)
+launchctl setenv OLLAMA_ORIGINS "*"
+
+# Restart Ollama so it picks up the new OLLAMA_ORIGINS setting
+pkill -f ollama 2>/dev/null || true
+sleep 1
+ollama serve &>/dev/null &
+sleep 2
+
 # --- 3. Pull the default model ---
 
 echo "[3/3] Pulling model '$DEFAULT_MODEL' (this may take a minute)..."

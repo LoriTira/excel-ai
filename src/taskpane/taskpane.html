@@ -181,6 +181,9 @@
             <ul style="margin-top:4px; padding-left:16px; color:#666;">
                 <li>Make sure Ollama is running: <code>ollama serve</code></li>
                 <li>Pull a model if you don't have one: <code>ollama pull qwen2.5:1.5b</code></li>
+                <li>Allow connections from the add-in (CORS):<br/>
+                    Mac: <code>launchctl setenv OLLAMA_ORIGINS "*"</code> then restart Ollama<br/>
+                    Windows: set env var <code>OLLAMA_ORIGINS=*</code> then restart Ollama</li>
                 <li>List available models: <code>ollama list</code></li>
             </ul>
         </details>
