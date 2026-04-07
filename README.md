@@ -70,6 +70,29 @@ Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
 
 **Windows:** `irm https://loritira.github.io/excel-ai/uninstall.ps1 | iex`
 
+## Model comparison
+
+We benchmarked 9 local models on 10 realistic Excel tasks (factual Q&A, sentiment classification, unit conversion, translation, summarization, email extraction, Excel formula generation, prime check, math, expense categorization). All tests used `num_ctx=2048`, which is plenty for cell prompts and keeps RAM low.
+
+| Model | Disk | RAM | Avg latency | Score | Notes |
+|---|---|---|---|---|---|
+| **llama3.2:1b** | 1.3 GB | ~1.5 GB | 116 ms | **9.5/10** | **Default.** Best accuracy/size ratio. Nails `=SUM(A:A)`. |
+| gemma3:4b | 3.3 GB | ~4.2 GB | 270 ms | 9/10 | Best raw accuracy. Only misses prime check. |
+| granite3-moe:3b | 2.1 GB | ~2.2 GB | 103 ms | 9/10 | Fastest overall. One math error (0.345 vs 34.5). |
+| phi4-mini | 2.5 GB | ~2.8 GB | 198 ms | 8/10 | Strong reasoning. Misses conversion + prime. |
+| llama3.2:3b | 2.0 GB | ~2.3 GB | 166 ms | 8/10 | Solid all-round. Misses conversion + formula. |
+| qwen2.5:1.5b | 986 MB | ~1.1 GB | 113 ms | 7/10 | Smallest + fastest. Weaker on formulas + math. |
+| gemma3:1b | 815 MB | ~1.3 GB | 158 ms | 7/10 | Tiny. Catastrophic math error (217 for 34.5). |
+| smollm2:1.7b | 1.8 GB | — | 120 ms | 5/10 | Wrong on sentiment, conversion, prime, math. |
+| granite3-moe:1b | 821 MB | — | 189 ms | 3/10 | Refuses questions, verbose, wrong math. |
+
+> **RAM note:** Without `num_ctx=2048`, models with 128K default context allocate 5–18 GB of RAM. Excel AI sets this automatically so even 8 GB machines work fine.
+
+To switch models, change the model name in the Excel AI settings panel, or pass `--model` to the install script:
+```bash
+curl -fsSL https://loritira.github.io/excel-ai/install.sh | bash -s -- --model gemma3:4b
+```
+
 ## How it works
 
 The install script sets up three components that run locally:
