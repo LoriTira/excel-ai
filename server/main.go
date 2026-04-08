@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -42,26 +43,35 @@ var (
 )
 
 // findOllama resolves the full path to the ollama binary.
-// The proxy runs under launchd/Scheduled Task with a minimal PATH,
-// so we check common install locations as fallbacks.
+// The install script writes the path to ollama-path next to the server binary.
+// Falls back to common locations if that file is missing.
 func findOllama() string {
+	// 1. Read path saved by install script (most reliable)
+	if exePath, err := os.Executable(); err == nil {
+		configPath := filepath.Join(filepath.Dir(exePath), "ollama-path")
+		if data, err := os.ReadFile(configPath); err == nil {
+			p := strings.TrimSpace(string(data))
+			if p != "" {
+				if _, err := os.Stat(p); err == nil {
+					return p
+				}
+			}
+		}
+	}
+
+	// 2. Check PATH (works in dev, rarely in production under launchd/Scheduled Task)
 	if p, err := exec.LookPath("ollama"); err == nil {
 		return p
 	}
-	var candidates []string
+
+	// 3. Common install locations as last resort
+	candidates := []string{"/usr/local/bin/ollama", "/opt/homebrew/bin/ollama"}
 	if runtime.GOOS == "windows" {
+		candidates = nil
 		if localAppData := os.Getenv("LOCALAPPDATA"); localAppData != "" {
-			candidates = append(candidates,
-				filepath.Join(localAppData, "Programs", "Ollama", "ollama.exe"),
-			)
-		}
-		if userProfile := os.Getenv("USERPROFILE"); userProfile != "" {
-			candidates = append(candidates,
-				filepath.Join(userProfile, "AppData", "Local", "Programs", "Ollama", "ollama.exe"),
-			)
+			candidates = append(candidates, filepath.Join(localAppData, "Programs", "Ollama", "ollama.exe"))
 		}
 	} else {
-		candidates = append(candidates, "/usr/local/bin/ollama")
 		if home, err := os.UserHomeDir(); err == nil {
 			candidates = append(candidates, filepath.Join(home, ".local", "bin", "ollama"))
 		}
@@ -71,7 +81,7 @@ func findOllama() string {
 			return p
 		}
 	}
-	return "ollama" // last resort: hope it's on PATH at runtime
+	return "ollama"
 }
 
 func startOllama() error {

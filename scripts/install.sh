@@ -76,6 +76,10 @@ esac
 curl -fsSL "$BASE_URL/$BINARY" -o "$INSTALL_DIR/excelai-server"
 chmod +x "$INSTALL_DIR/excelai-server"
 
+# Save the resolved ollama path so the server can find it under launchd's minimal PATH
+OLLAMA_BIN="$(command -v ollama)"
+echo "$OLLAMA_BIN" > "$INSTALL_DIR/ollama-path"
+
 # --- 5. Install manifest and configure auto-start ---
 
 echo "[4/5] Installing add-in manifest and auto-start..."

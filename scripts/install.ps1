@@ -110,6 +110,10 @@ Start-Sleep -Seconds 1
 Invoke-WebRequest -Uri "$BaseUrl/$binaryName" -OutFile $ServerBinary -UseBasicParsing
 Invoke-WebRequest -Uri "$BaseUrl/manifest-local.xml" -OutFile $ManifestPath -UseBasicParsing
 
+# Save the resolved ollama path so the server can find it under Scheduled Task's minimal PATH
+$ollamaBin = (Get-Command ollama).Source
+$ollamaBin | Out-File -FilePath (Join-Path $InstallDir "ollama-path") -Encoding ascii -NoNewline
+
 # --- 4. Register manifest and configure auto-start ---
 
 Write-Host "[4/5] Configuring add-in and auto-start..."
