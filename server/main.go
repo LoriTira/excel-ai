@@ -96,7 +96,8 @@ func stopOllama() {
 		return
 	}
 
-	if ollamaStarted && ollamaCmd != nil && ollamaCmd.Process != nil {
+	// Kill the process we spawned, if any
+	if ollamaCmd != nil && ollamaCmd.Process != nil {
 		if runtime.GOOS == "windows" {
 			ollamaCmd.Process.Kill()
 		} else {
@@ -105,10 +106,22 @@ func stopOllama() {
 		ollamaCmd.Wait()
 	}
 
+	// Also kill any Ollama process we didn't spawn (e.g. started by Ollama's own auto-start)
+	killAllOllama()
+
 	ollamaCmd = nil
 	ollamaRunning = false
 	ollamaStarted = false
 	fmt.Println("Ollama stopped.")
+}
+
+// killAllOllama terminates all Ollama processes on the system.
+func killAllOllama() {
+	if runtime.GOOS == "windows" {
+		exec.Command("taskkill", "/IM", "ollama.exe", "/F").Run()
+	} else {
+		exec.Command("pkill", "-x", "ollama").Run()
+	}
 }
 
 func watchdog() {

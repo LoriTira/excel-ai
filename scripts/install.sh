@@ -85,6 +85,15 @@ curl -fsSL "$BASE_URL/manifest-local.xml" -o "$WEF_DIR/$ADDIN_ID.manifest.xml"
 # Clean up any old Ollama HTTPS config
 launchctl unsetenv OLLAMA_HOST 2>/dev/null || true
 
+# Disable Ollama's own auto-start (our proxy manages Ollama lifecycle)
+OLLAMA_PLIST="$HOME/Library/LaunchAgents/com.ollama.ollama.plist"
+if [ -f "$OLLAMA_PLIST" ]; then
+  launchctl unload "$OLLAMA_PLIST" 2>/dev/null || true
+  rm -f "$OLLAMA_PLIST"
+fi
+pkill -x ollama 2>/dev/null || true
+pkill -x Ollama 2>/dev/null || true
+
 # Create launchd plist for auto-start
 mkdir -p "$HOME/Library/LaunchAgents"
 cat > "$PLIST_PATH" << PLIST

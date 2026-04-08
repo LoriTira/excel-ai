@@ -45,6 +45,10 @@ if ($ollamaCmd) {
 [System.Environment]::SetEnvironmentVariable("OLLAMA_HOST", $null, "User")
 $env:OLLAMA_HOST = $null
 
+# Disable Ollama's own auto-start (our proxy manages Ollama lifecycle)
+Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "Ollama" -ErrorAction SilentlyContinue
+Get-Process -Name "ollama" -ErrorAction SilentlyContinue | Stop-Process -Force
+
 # --- 2. Generate TLS certificate ---
 
 Write-Host "[2/5] Setting up TLS certificate..."
