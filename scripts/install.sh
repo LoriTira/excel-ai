@@ -113,16 +113,18 @@ PLIST
 launchctl unload "$PLIST_PATH" 2>/dev/null || true
 launchctl load "$PLIST_PATH"
 
-# Ensure Ollama is running
-if ! pgrep -x ollama &>/dev/null; then
-  ollama serve &>/dev/null &
-  sleep 3
-fi
-
 # --- 6. Pull the default model ---
+
+# Start Ollama temporarily for model pull (the proxy manages it at runtime)
+ollama serve &>/dev/null &
+OLLAMA_PID=$!
+sleep 3
 
 echo "[5/5] Pulling model '$DEFAULT_MODEL' (this may take a minute)..."
 ollama pull "$DEFAULT_MODEL"
+
+kill $OLLAMA_PID 2>/dev/null || true
+wait $OLLAMA_PID 2>/dev/null || true
 
 echo ""
 echo "Excel AI installed successfully!"

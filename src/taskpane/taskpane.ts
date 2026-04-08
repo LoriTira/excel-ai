@@ -5,7 +5,16 @@ import * as cache from "../services/cache";
 
 Office.onReady(() => {
   loadSettingsIntoForm();
-  detectLocalModel();
+
+  // Heartbeat keeps Ollama alive while Excel is open; proxy starts/stops it on demand
+  const sendHeartbeat = () => {
+    fetch("/heartbeat", { signal: AbortSignal.timeout(3000) }).catch(() => {});
+  };
+  sendHeartbeat();
+  setInterval(sendHeartbeat, 30000);
+
+  // Give Ollama a moment to start before detecting models
+  setTimeout(() => detectLocalModel(), 3000);
 
   // Provider radio toggle
   document.querySelectorAll<HTMLInputElement>('input[name="provider"]').forEach((radio) => {

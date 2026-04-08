@@ -127,16 +127,16 @@ Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Se
 # Start the server now
 Start-Process -FilePath $ServerBinary -WindowStyle Hidden
 
-# Ensure Ollama is running (Ollama auto-starts after install; only start if not running)
-if (-not (Get-Process -Name "ollama" -ErrorAction SilentlyContinue)) {
-    Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
-    Start-Sleep -Seconds 3
-}
-
 # --- 5. Pull the default model ---
+
+# Start Ollama temporarily for model pull (the proxy manages it at runtime)
+$ollamaProc = Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden -PassThru
+Start-Sleep -Seconds 3
 
 Write-Host "[5/5] Pulling model '$Model' (this may take a minute)..."
 & ollama pull $Model
+
+Stop-Process -Id $ollamaProc.Id -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "Excel AI installed successfully!" -ForegroundColor Green
