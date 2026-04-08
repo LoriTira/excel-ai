@@ -30,13 +30,15 @@ if ($ollamaCmd) {
     $installerPath = Join-Path $env:TEMP "OllamaSetup.exe"
     & curl.exe -# -L -o $installerPath "https://ollama.com/download/OllamaSetup.exe"
     Write-Host "  Running Ollama installer..."
-    Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT","/NORESTART" -Wait
+    Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT","/NORESTART"
+    # Installer launches Ollama and doesn't exit — poll for ollama on PATH instead
+    do {
+        Start-Sleep -Seconds 2
+        $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+        $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+        $env:Path = "$machinePath;$userPath"
+    } until (Get-Command ollama -ErrorAction SilentlyContinue)
     Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
-
-    # Refresh PATH so ollama command is available
-    $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    $env:Path = "$machinePath;$userPath"
 }
 
 # Clean up any old HTTPS config from previous installs
