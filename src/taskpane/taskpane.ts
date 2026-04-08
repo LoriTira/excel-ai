@@ -10,11 +10,12 @@ Office.onReady(() => {
   const sendHeartbeat = () => {
     fetch("/heartbeat", { signal: AbortSignal.timeout(3000) }).catch(() => {});
   };
-  sendHeartbeat();
   setInterval(sendHeartbeat, 30000);
 
-  // Give Ollama a moment to start before detecting models
-  setTimeout(() => detectLocalModel(), 3000);
+  // First heartbeat triggers Ollama startup; detect models once it confirms running
+  fetch("/heartbeat", { signal: AbortSignal.timeout(15000) })
+    .then(() => detectLocalModel())
+    .catch(() => detectLocalModel()); // try anyway on timeout
 
   // Provider radio toggle
   document.querySelectorAll<HTMLInputElement>('input[name="provider"]').forEach((radio) => {

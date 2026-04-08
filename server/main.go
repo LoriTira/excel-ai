@@ -31,60 +31,120 @@ const (
 
 // Ollama lifecycle state
 var (
-	mu             sync.Mutex
-	ollamaCmd      *exec.Cmd
-	ollamaRunning  bool
-	ollamaStarted  bool // true if we spawned the process
-	lastHeartbeat  time.Time
+	mu              sync.Mutex
+	ollamaCmd       *exec.Cmd
+	ollamaRunning   bool
+	ollamaStarting  bool
+	startDone       chan struct{} // closed when startup attempt completes
+	lastHeartbeat   time.Time
 	ollamaStartedAt time.Time
+	ollamaPath      string // resolved path to ollama binary
 )
+
+// findOllama resolves the full path to the ollama binary.
+// The proxy runs under launchd/Scheduled Task with a minimal PATH,
+// so we check common install locations as fallbacks.
+func findOllama() string {
+	if p, err := exec.LookPath("ollama"); err == nil {
+		return p
+	}
+	var candidates []string
+	if runtime.GOOS == "windows" {
+		if localAppData := os.Getenv("LOCALAPPDATA"); localAppData != "" {
+			candidates = append(candidates,
+				filepath.Join(localAppData, "Programs", "Ollama", "ollama.exe"),
+			)
+		}
+		if userProfile := os.Getenv("USERPROFILE"); userProfile != "" {
+			candidates = append(candidates,
+				filepath.Join(userProfile, "AppData", "Local", "Programs", "Ollama", "ollama.exe"),
+			)
+		}
+	} else {
+		candidates = append(candidates, "/usr/local/bin/ollama")
+		if home, err := os.UserHomeDir(); err == nil {
+			candidates = append(candidates, filepath.Join(home, ".local", "bin", "ollama"))
+		}
+	}
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+	return "ollama" // last resort: hope it's on PATH at runtime
+}
 
 func startOllama() error {
 	mu.Lock()
-	defer mu.Unlock()
 
 	if ollamaRunning {
+		mu.Unlock()
 		return nil
+	}
+
+	// Another goroutine is already starting Ollama — wait for it
+	if ollamaStarting {
+		ch := startDone
+		mu.Unlock()
+		<-ch
+		mu.Lock()
+		ok := ollamaRunning
+		mu.Unlock()
+		if ok {
+			return nil
+		}
+		return fmt.Errorf("ollama startup failed (concurrent)")
 	}
 
 	// Check if Ollama is already running externally
 	if isOllamaReachable() {
 		ollamaRunning = true
-		ollamaStarted = false
 		ollamaStartedAt = time.Now()
 		go watchdog()
+		mu.Unlock()
+		fmt.Println("Ollama already running.")
 		return nil
 	}
 
+	// Mark as starting so concurrent callers wait
+	ollamaStarting = true
+	startDone = make(chan struct{})
+
 	// Spawn Ollama
-	cmd := exec.Command("ollama", "serve")
+	fmt.Printf("Starting Ollama (%s)...\n", ollamaPath)
+	cmd := exec.Command(ollamaPath, "serve")
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start ollama: %w", err)
+		ollamaStarting = false
+		close(startDone)
+		mu.Unlock()
+		return fmt.Errorf("failed to start ollama (%s): %w", ollamaPath, err)
 	}
 
 	ollamaCmd = cmd
-	ollamaRunning = true
-	ollamaStarted = true
-	ollamaStartedAt = time.Now()
-
-	// Wait for Ollama to become reachable (unlock while polling)
 	mu.Unlock()
-	err := waitForOllama()
-	mu.Lock()
 
+	// Poll until Ollama is reachable (no lock held — allows heartbeats/requests to queue)
+	err := waitForOllama()
+
+	mu.Lock()
+	ollamaStarting = false
 	if err != nil {
-		// Failed to start — clean up
-		ollamaCmd.Process.Kill()
-		ollamaCmd.Wait()
+		cmd.Process.Kill()
+		cmd.Wait()
 		ollamaCmd = nil
-		ollamaRunning = false
-		ollamaStarted = false
+		close(startDone)
+		mu.Unlock()
 		return err
 	}
 
+	ollamaRunning = true
+	ollamaStartedAt = time.Now()
+	close(startDone)
 	go watchdog()
+	mu.Unlock()
+	fmt.Println("Ollama started.")
 	return nil
 }
 
@@ -111,7 +171,6 @@ func stopOllama() {
 
 	ollamaCmd = nil
 	ollamaRunning = false
-	ollamaStarted = false
 	fmt.Println("Ollama stopped.")
 }
 
@@ -167,15 +226,9 @@ func waitForOllama() error {
 
 func ensureOllama(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		mu.Lock()
-		running := ollamaRunning
-		mu.Unlock()
-
-		if !running {
-			if err := startOllama(); err != nil {
-				http.Error(w, fmt.Sprintf("Failed to start Ollama: %v", err), http.StatusBadGateway)
-				return
-			}
+		if err := startOllama(); err != nil {
+			http.Error(w, fmt.Sprintf("Failed to start Ollama: %v", err), http.StatusBadGateway)
+			return
 		}
 		next(w, r)
 	}
@@ -189,15 +242,12 @@ type heartbeatResponse struct {
 func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	lastHeartbeat = time.Now()
-	running := ollamaRunning
 	mu.Unlock()
 
-	if !running {
-		if err := startOllama(); err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(heartbeatResponse{Ollama: "error"})
-			return
-		}
+	if err := startOllama(); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(heartbeatResponse{Ollama: "error"})
+		return
 	}
 
 	mu.Lock()
@@ -213,6 +263,10 @@ func main() {
 	if err != nil {
 		fatal("cannot find home directory: %v", err)
 	}
+
+	// Resolve ollama binary path at startup
+	ollamaPath = findOllama()
+	fmt.Printf("Ollama binary: %s\n", ollamaPath)
 
 	certFile := filepath.Join(home, ".ollama", "cert.pem")
 	keyFile := filepath.Join(home, ".ollama", "key.pem")
