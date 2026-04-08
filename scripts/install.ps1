@@ -19,28 +19,32 @@ $TaskName = "ExcelAI-Server"
 function Download-WithProgress {
     param([string]$Url, [string]$OutFile, [string]$Label)
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $wc = New-Object System.Net.WebClient
-    $script:lastPercent = -1
-    $wc.Add_DownloadProgressChanged({
-        param($sender, $e)
-        if ($e.TotalBytesToReceive -gt 0) {
-            if ($e.ProgressPercentage -ne $script:lastPercent) {
-                $script:lastPercent = $e.ProgressPercentage
-                $mb = [math]::Round($e.BytesReceived / 1MB, 1)
-                $total = [math]::Round($e.TotalBytesToReceive / 1MB, 1)
-                Write-Host ("`r  $Label {0}% ({1} / {2} MB)" -f $e.ProgressPercentage, $mb, $total) -NoNewline
+    $response = [System.Net.HttpWebRequest]::Create($Url).GetResponse()
+    $totalBytes = $response.ContentLength
+    $stream = $response.GetResponseStream()
+    $fileStream = [System.IO.File]::Create($OutFile)
+    $buffer = New-Object byte[] 65536
+    $totalRead = 0
+    $lastPercent = -1
+    while (($bytesRead = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+        $fileStream.Write($buffer, 0, $bytesRead)
+        $totalRead += $bytesRead
+        if ($totalBytes -gt 0) {
+            $percent = [math]::Floor($totalRead * 100 / $totalBytes)
+            if ($percent -ne $lastPercent) {
+                $lastPercent = $percent
+                $mb = [math]::Round($totalRead / 1MB, 1)
+                $totalMb = [math]::Round($totalBytes / 1MB, 1)
+                Write-Host ("`r  $Label {0}% ({1} / {2} MB)" -f $percent, $mb, $totalMb) -NoNewline
             }
         } else {
-            $mb = [math]::Round($e.BytesReceived / 1MB, 1)
+            $mb = [math]::Round($totalRead / 1MB, 1)
             Write-Host ("`r  $Label {0} MB downloaded..." -f $mb) -NoNewline
         }
-    })
-    $wc.Add_DownloadFileCompleted({
-        param($sender, $e)
-        if ($e.Error) { throw $e.Error }
-    })
-    $wc.DownloadFileTaskAsync($Url, $OutFile).GetAwaiter().GetResult()
-    $wc.Dispose()
+    }
+    $fileStream.Close()
+    $stream.Close()
+    $response.Close()
     Write-Host ""
 }
 
