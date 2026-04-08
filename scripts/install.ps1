@@ -73,7 +73,7 @@ if (-not (Test-Path $CertPath)) {
 
     # Export private key as PEM
     $rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
-    $keyBytes = $rsa.ExportPkcs8PrivateKey()
+    $keyBytes = $rsa.Key.Export([System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob)
     $keyBase64 = [Convert]::ToBase64String($keyBytes, 'InsertLineBreaks')
     "-----BEGIN PRIVATE KEY-----`n$keyBase64`n-----END PRIVATE KEY-----" | Out-File -FilePath $KeyPath -Encoding ascii -NoNewline
 
