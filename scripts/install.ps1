@@ -28,7 +28,9 @@ if ($ollamaCmd) {
 } else {
     Write-Host "[1/5] Installing Ollama..."
     $installerPath = Join-Path $env:TEMP "OllamaSetup.exe"
-    & curl.exe -sL -o $installerPath "https://ollama.com/download/OllamaSetup.exe"
+    $ProgressPreference = "Continue"
+    Start-BitsTransfer -Source "https://ollama.com/download/OllamaSetup.exe" -Destination $installerPath
+    $ProgressPreference = "SilentlyContinue"
     Write-Host "  Running Ollama installer..."
     Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT","/NORESTART"
     # Installer launches Ollama and doesn't exit — poll for ollama on PATH instead
