@@ -16,38 +16,6 @@ $ManifestPath = Join-Path $InstallDir "manifest.xml"
 $RegPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Wef\Developer"
 $TaskName = "ExcelAI-Server"
 
-function Download-WithProgress {
-    param([string]$Url, [string]$OutFile, [string]$Label)
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $response = [System.Net.HttpWebRequest]::Create($Url).GetResponse()
-    $totalBytes = $response.ContentLength
-    $stream = $response.GetResponseStream()
-    $fileStream = [System.IO.File]::Create($OutFile)
-    $buffer = New-Object byte[] 65536
-    $totalRead = 0
-    $lastPercent = -1
-    while (($bytesRead = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
-        $fileStream.Write($buffer, 0, $bytesRead)
-        $totalRead += $bytesRead
-        if ($totalBytes -gt 0) {
-            $percent = [math]::Floor($totalRead * 100 / $totalBytes)
-            if ($percent -ne $lastPercent) {
-                $lastPercent = $percent
-                $mb = [math]::Round($totalRead / 1MB, 1)
-                $totalMb = [math]::Round($totalBytes / 1MB, 1)
-                Write-Host ("`r  $Label {0}% ({1} / {2} MB)" -f $percent, $mb, $totalMb) -NoNewline
-            }
-        } else {
-            $mb = [math]::Round($totalRead / 1MB, 1)
-            Write-Host ("`r  $Label {0} MB downloaded..." -f $mb) -NoNewline
-        }
-    }
-    $fileStream.Close()
-    $stream.Close()
-    $response.Close()
-    Write-Host ""
-}
-
 Write-Host "Installing Excel AI..."
 Write-Host "Source: $BaseUrl"
 Write-Host ""
@@ -60,7 +28,7 @@ if ($ollamaCmd) {
 } else {
     Write-Host "[1/5] Installing Ollama..."
     $installerPath = Join-Path $env:TEMP "OllamaSetup.exe"
-    Download-WithProgress -Url "https://ollama.com/download/OllamaSetup.exe" -OutFile $installerPath -Label "Downloading Ollama:"
+    & curl.exe -# -L -o $installerPath "https://ollama.com/download/OllamaSetup.exe"
     Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT","/NORESTART" -Wait
     Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
 
