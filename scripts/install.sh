@@ -39,7 +39,13 @@ if command -v ollama &>/dev/null; then
   echo "[1/5] Ollama is already installed."
 else
   echo "[1/5] Installing Ollama..."
-  curl -fsSL https://ollama.com/install.sh | sh
+  # The Ollama installer may fail at its "Starting Ollama..." step (e.g. open -a Ollama
+  # can't find the app). That's fine — we manage Ollama's lifecycle ourselves.
+  curl -fsSL https://ollama.com/install.sh | sh || true
+  if ! command -v ollama &>/dev/null; then
+    echo "Error: Ollama installation failed — 'ollama' not found on PATH."
+    exit 1
+  fi
 fi
 
 # --- 3. Generate TLS certificate ---
