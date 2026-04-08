@@ -16,6 +16,34 @@ $ManifestPath = Join-Path $InstallDir "manifest.xml"
 $RegPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Wef\Developer"
 $TaskName = "ExcelAI-Server"
 
+function Download-WithProgress {
+    param([string]$Url, [string]$OutFile, [string]$Label)
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $wc = New-Object System.Net.WebClient
+    $script:lastPercent = -1
+    $wc.Add_DownloadProgressChanged({
+        param($sender, $e)
+        if ($e.TotalBytesToReceive -gt 0) {
+            if ($e.ProgressPercentage -ne $script:lastPercent) {
+                $script:lastPercent = $e.ProgressPercentage
+                $mb = [math]::Round($e.BytesReceived / 1MB, 1)
+                $total = [math]::Round($e.TotalBytesToReceive / 1MB, 1)
+                Write-Host ("`r  $Label {0}% ({1} / {2} MB)" -f $e.ProgressPercentage, $mb, $total) -NoNewline
+            }
+        } else {
+            $mb = [math]::Round($e.BytesReceived / 1MB, 1)
+            Write-Host ("`r  $Label {0} MB downloaded..." -f $mb) -NoNewline
+        }
+    })
+    $wc.Add_DownloadFileCompleted({
+        param($sender, $e)
+        if ($e.Error) { throw $e.Error }
+    })
+    $wc.DownloadFileTaskAsync($Url, $OutFile).GetAwaiter().GetResult()
+    $wc.Dispose()
+    Write-Host ""
+}
+
 Write-Host "Installing Excel AI..."
 Write-Host "Source: $BaseUrl"
 Write-Host ""
@@ -28,7 +56,7 @@ if ($ollamaCmd) {
 } else {
     Write-Host "[1/5] Installing Ollama..."
     $installerPath = Join-Path $env:TEMP "OllamaSetup.exe"
-    Invoke-WebRequest -Uri "https://ollama.com/download/OllamaSetup.exe" -OutFile $installerPath -UseBasicParsing
+    Download-WithProgress -Url "https://ollama.com/download/OllamaSetup.exe" -OutFile $installerPath -Label "Downloading Ollama:"
     Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT","/NORESTART" -Wait
     Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
 
