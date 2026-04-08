@@ -45,10 +45,26 @@ osascript -e 'quit app "Ollama"' 2>/dev/null || true
 pkill -f ollama 2>/dev/null || true
 sleep 1
 
-# Remove the Ollama binary
-if [ -f /usr/local/bin/ollama ]; then
+# Remove the Ollama binary (check saved path, brew, and common locations)
+OLLAMA_BIN=""
+if [ -f "$INSTALL_DIR/ollama-path" ]; then
+  OLLAMA_BIN="$(cat "$INSTALL_DIR/ollama-path" 2>/dev/null | tr -d '[:space:]')"
+fi
+if [ -z "$OLLAMA_BIN" ]; then
+  OLLAMA_BIN="$(command -v ollama 2>/dev/null || true)"
+fi
+
+if command -v brew &>/dev/null && brew list ollama &>/dev/null; then
+  brew uninstall ollama
+  echo "  Uninstalled Ollama via Homebrew."
+elif [ -n "$OLLAMA_BIN" ] && [ -f "$OLLAMA_BIN" ]; then
+  sudo rm -f "$OLLAMA_BIN"
+  echo "  Removed $OLLAMA_BIN"
+elif [ -f /usr/local/bin/ollama ]; then
   sudo rm -f /usr/local/bin/ollama
   echo "  Removed /usr/local/bin/ollama"
+else
+  echo "  Ollama binary not found (already removed?)."
 fi
 
 # Remove the Ollama app if installed via .dmg
