@@ -76,12 +76,20 @@ if (Test-Path $ollamaProgDir) {
 Write-Host "[5/5] Cleaning up..."
 
 # Remove the trusted cert from the user root store
-$certs = Get-ChildItem Cert:\CurrentUser\Root | Where-Object { $_.Subject -match "Excel AI Local" }
-foreach ($cert in $certs) {
+# Note: Windows may show a security dialog asking to confirm certificate removal
+try {
     $rootStore = New-Object System.Security.Cryptography.X509Certificates.X509Store("Root", "CurrentUser")
     $rootStore.Open("ReadWrite")
-    $rootStore.Remove($cert)
+    $toRemove = $rootStore.Certificates | Where-Object { $_.Subject -match "Excel AI Local" }
+    foreach ($cert in $toRemove) {
+        $rootStore.Remove($cert)
+    }
     $rootStore.Close()
+    if ($toRemove.Count -gt 0) {
+        Write-Host "  Removed trusted certificate."
+    }
+} catch {
+    Write-Host "  Could not remove certificate (you may need to remove it manually from certmgr.msc)."
 }
 
 [System.Environment]::SetEnvironmentVariable("OLLAMA_HOST", $null, "User")
