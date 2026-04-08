@@ -74,19 +74,24 @@ Removes everything: the add-in, the server binary, Ollama, all models, TLS certi
 
 ## Model comparison
 
-We benchmarked 9 local models on 10 realistic Excel tasks (factual Q&A, sentiment classification, unit conversion, translation, summarization, email extraction, Excel formula generation, prime check, math, expense categorization). All tests used `num_ctx=2048`, which is plenty for cell prompts and keeps RAM low.
+We benchmarked 14 local models on 95 real-world Excel tasks across 10 categories (sentiment analysis, data extraction, expense categorization, data cleaning, formula generation, translation, code snippets, summarization, email drafting, product copy). All tests used `num_ctx=2048` and `temperature=0.3`. Run the benchmark yourself with `python3 scripts/eval.py`.
 
-| Model | Disk | RAM | Avg latency | Score | Notes |
-|---|---|---|---|---|---|
-| **llama3.2:1b** | 1.3 GB | ~1.5 GB | 116 ms | **9.5/10** | **Default.** Best accuracy/size ratio. Nails `=SUM(A:A)`. |
-| gemma3:4b | 3.3 GB | ~4.2 GB | 270 ms | 9/10 | Best raw accuracy. Only misses prime check. |
-| granite3-moe:3b | 2.1 GB | ~2.2 GB | 103 ms | 9/10 | Fastest overall. One math error (0.345 vs 34.5). |
-| phi4-mini | 2.5 GB | ~2.8 GB | 198 ms | 8/10 | Strong reasoning. Misses conversion + prime. |
-| llama3.2:3b | 2.0 GB | ~2.3 GB | 166 ms | 8/10 | Solid all-round. Misses conversion + formula. |
-| qwen2.5:1.5b | 986 MB | ~1.1 GB | 113 ms | 7/10 | Smallest + fastest. Weaker on formulas + math. |
-| gemma3:1b | 815 MB | ~1.3 GB | 158 ms | 7/10 | Tiny. Catastrophic math error (217 for 34.5). |
-| smollm2:1.7b | 1.8 GB | — | 120 ms | 5/10 | Wrong on sentiment, conversion, prime, math. |
-| granite3-moe:1b | 821 MB | — | 189 ms | 3/10 | Refuses questions, verbose, wrong math. |
+| Model | Score | Avg latency | Notes |
+|---|---|---|---|
+| gemma4:e4b | 85.3% | 1277 ms | Best accuracy. 9.6 GB download, needs 8+ GB RAM. |
+| gemma3:4b | 84.8% | 416 ms | Best quality/speed ratio. Recommended upgrade (3.3 GB). |
+| gemma4:e2b | 84.5% | 1191 ms | Similar to gemma3:4b but 2× slower (7.2 GB). |
+| qwen2.5:3b | 81.8% | 274 ms | Fast and accurate (2.0 GB). |
+| **qwen2.5:1.5b** | **80.6%** | **191 ms** | **Default.** Best accuracy at ~1 GB download / ~1.5 GB RAM. |
+| granite3-moe:3b | 80.5% | 187 ms | Fastest model. MoE architecture (2.1 GB). |
+| gemma3:1b | 79.3% | 310 ms | Strong 1B model (815 MB). |
+| llama3.2:3b | 78.6% | 260 ms | Solid all-round (2.0 GB). |
+| phi4-mini | 77.6% | 357 ms | Underwhelming for its size (2.5 GB). |
+| qwen3:1.7b | 75.0% | 1930 ms | Thinking mode adds 10× latency. |
+| qwen3:0.6b | 66.4% | 952 ms | Thinking overhead too high. |
+| llama3.2:1b | 62.8% | 197 ms | Previous default. Fast but weak on categorization + cleaning. |
+| smollm2:1.7b | 59.9% | 241 ms | Below average across tasks. |
+| qwen3:4b | 51.8% | 5498 ms | Thinking mode makes latency unusable in cells. |
 
 > **RAM note:** Without `num_ctx=2048`, models with 128K default context allocate 5–18 GB of RAM. Excel AI sets this automatically so even 8 GB machines work fine.
 
@@ -145,7 +150,7 @@ cd server && go build -ldflags="-s -w" -o excelai-server .
 +------------------+     HTTPS :11435     +------------------+     HTTP :11434     +------------------+
 |                  |  ================>   |                  |  ================>  |                  |
 |  Excel Add-in   |      same-origin     |  Go server       |      reverse proxy  |  Ollama          |
-|  (taskpane +    |  <================   |  (excelai-server) |  <================  |  (llama3.2:1b)   |
+|  (taskpane +    |  <================   |  (excelai-server) |  <================  |  (qwen2.5:1.5b)  |
 |   custom fns)   |     static files     |  ~8 MB binary    |      /v1/* /api/*   |  port 11434      |
 +------------------+                     +------------------+                     +------------------+
 ```
@@ -326,7 +331,7 @@ Steps:
 5. Download `manifest-local.xml` to wef directory: `~/Library/Containers/com.microsoft.Excel/Data/Documents/wef/<addin-id>.manifest.xml`
 6. Create launchd plist at `~/Library/LaunchAgents/com.excelai.server.plist` (RunAtLoad + KeepAlive)
 7. Start Ollama if not running
-8. Pull default model (`llama3.2:1b`, or custom via `--model` flag)
+8. Pull default model (`qwen2.5:1.5b`, or custom via `--model` flag)
 
 Flags: `--url <base>` (custom download URL), `--model <name>` (custom model)
 

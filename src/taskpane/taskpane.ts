@@ -48,7 +48,7 @@ async function detectLocalModel(): Promise<void> {
       el.innerHTML = `Using <strong>${models[0]}</strong>` +
         (models.length > 1 ? ` <span style="color:#999">(+${models.length - 1} more available)</span>` : "");
     } else {
-      el.innerHTML = 'No models found. Run <code>ollama pull llama3.2:1b</code>';
+      el.innerHTML = 'No models found. Run <code>ollama pull qwen2.5:1.5b</code>';
     }
   } catch {
     el.innerHTML = 'Cannot reach Ollama. Check troubleshooting below.';

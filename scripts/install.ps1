@@ -1,6 +1,6 @@
 param(
     [string]$BaseUrl = "https://loritira.github.io/excel-ai",
-    [string]$Model = "llama3.2:1b"
+    [string]$Model = "qwen2.5:1.5b"
 )
 
 $ErrorActionPreference = "Stop"
