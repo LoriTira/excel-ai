@@ -41,7 +41,7 @@ else
   echo "[1/5] Installing Ollama..."
   # The Ollama installer may fail at its "Starting Ollama..." step (e.g. open -a Ollama
   # can't find the app). That's fine — we manage Ollama's lifecycle ourselves.
-  curl -fsSL https://ollama.com/install.sh | sh || true
+  curl -fsSL https://ollama.com/install.sh | sh 2>&1 | grep -v "Unable to find application" || true
   if ! command -v ollama &>/dev/null; then
     echo "Error: Ollama installation failed — 'ollama' not found on PATH."
     exit 1
