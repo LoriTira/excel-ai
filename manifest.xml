@@ -5,7 +5,7 @@
            xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
            xsi:type="TaskPaneApp">
   <Id>5cc82bad-f723-4c10-82ba-f135772ad04f</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.1.0.0</Version>
   <ProviderName>Lorenzo</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Excel AI"/>
@@ -77,6 +77,21 @@
                     <SourceLocation resid="Taskpane.Url"/>
                   </Action>
                 </Control>
+                <Control xsi:type="Button" id="FreezeButton">
+                  <Label resid="FreezeButton.Label"/>
+                  <Supertip>
+                    <Title resid="FreezeButton.Label"/>
+                    <Description resid="FreezeButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>freezeAIResults</FunctionName>
+                  </Action>
+                </Control>
               </Group>
             </OfficeTab>
           </ExtensionPoint>
@@ -99,10 +114,12 @@
         <bt:String id="GetStarted.Title" DefaultValue="Excel AI is ready!"/>
         <bt:String id="CommandsGroup.Label" DefaultValue="Excel AI"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Excel AI"/>
+        <bt:String id="FreezeButton.Label" DefaultValue="Freeze AI results"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Excel AI add-in loaded. Use =EXCELAI.AI(&quot;your prompt&quot;) in any cell."/>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Show Excel AI task pane"/>
+        <bt:String id="FreezeButton.Tooltip" DefaultValue="Replace every =EXCELAI.AI() formula in the workbook with its current value, so the file opens correctly on machines without this add-in."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

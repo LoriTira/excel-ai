@@ -2,8 +2,17 @@
 
 import { getSettings, saveSettings, ProviderSettings } from "../services/settings";
 import * as cache from "../services/cache";
+import { freezeWorkbook } from "../services/freeze";
 
 Office.onReady(() => {
+  // Ribbon button handler — must be registered at load, not gated on taskpane DOM.
+  if (Office.actions && typeof Office.actions.associate === "function") {
+    Office.actions.associate("freezeAIResults", freezeFromRibbon);
+  }
+
+  // Taskpane-only wiring below. Bail if the DOM hasn't been injected (ribbon-only load).
+  if (!document.getElementById("save-btn")) return;
+
   loadSettingsIntoForm();
 
   // Heartbeat keeps Ollama alive while Excel is open; proxy starts/stops it on demand
@@ -23,7 +32,37 @@ Office.onReady(() => {
   });
 
   document.getElementById("save-btn")!.addEventListener("click", handleSave);
+  document.getElementById("freeze-btn")!.addEventListener("click", handleFreezeClick);
 });
+
+async function handleFreezeClick(): Promise<void> {
+  const ok = window.confirm(
+    "Freeze replaces every =EXCELAI.AI(...) formula in this workbook with its current value. " +
+      "This cannot be undone with Ctrl+Z after saving.\n\nContinue?"
+  );
+  if (!ok) return;
+
+  showStatus("Freezing AI results\u2026");
+  try {
+    const { frozen, skipped } = await freezeWorkbook();
+    const parts = [`Froze ${frozen} cell${frozen === 1 ? "" : "s"}`];
+    if (skipped > 0) parts.push(`skipped ${skipped} error cell${skipped === 1 ? "" : "s"}`);
+    showStatus(parts.join(", ") + ".");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    showStatus(`Freeze failed: ${msg}`, true);
+  }
+}
+
+async function freezeFromRibbon(event: Office.AddinCommands.Event): Promise<void> {
+  try {
+    await freezeWorkbook();
+  } catch {
+    // Ribbon handler has no UI surface; errors are visible in cells already.
+  } finally {
+    event.completed();
+  }
+}
 
 function togglePanels(provider: string): void {
   document.getElementById("local-panel")!.classList.toggle("active", provider === "local");

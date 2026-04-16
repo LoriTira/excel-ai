@@ -64,6 +64,15 @@ Start-ScheduledTask -TaskName "ExcelAI-Server"
 Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
 ```
 
+### Sharing workbooks
+
+`=EXCELAI.AI()` is a custom function — it only works on machines where the Excel AI add-in is installed. A file that uses it, opened without the add-in, will show:
+
+- The **cached value** from the last time the formula calculated, on first open.
+- `#NAME?` after any recalc (F9, editing a cell, or opening in Excel Online).
+
+Before sharing a workbook, click **Freeze AI results** (ribbon button in the Home tab, or in the task pane). This replaces every `=EXCELAI.AI(...)` formula with its current value — numbers and booleans are coerced to native types so `SUM`, `AVERAGE`, `IF` keep working. Cells that currently hold `#ERROR:` are skipped. The action is not undoable once saved.
+
 ### Uninstall
 
 Removes everything: the add-in, the server binary, Ollama, all models, TLS certificates, and environment variables.

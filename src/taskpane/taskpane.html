@@ -102,16 +102,18 @@
         .settings-panel.active {
             display: block;
         }
-        #save-btn {
+        #save-btn, #freeze-btn {
             margin-top: 16px;
             padding: 6px 16px;
             border: none;
             border-radius: 4px;
-            background: #1a6b37;
-            color: #fff;
             font-size: 0.85em;
             font-weight: 600;
             cursor: pointer;
+        }
+        #save-btn {
+            background: #1a6b37;
+            color: #fff;
         }
         #save-btn:hover {
             background: #15562d;
@@ -122,6 +124,22 @@
         }
         body.dark-mode #save-btn:hover {
             background: #45b870;
+        }
+        #freeze-btn {
+            background: #f0f0f0;
+            color: #1a1a1a;
+            border: 1px solid #ccc;
+        }
+        #freeze-btn:hover {
+            background: #e4e4e4;
+        }
+        body.dark-mode #freeze-btn {
+            background: #2d2d2d;
+            color: #f0f0f0;
+            border-color: #555;
+        }
+        body.dark-mode #freeze-btn:hover {
+            background: #3a3a3a;
         }
         #status-msg {
             margin-top: 8px;
@@ -205,6 +223,15 @@
 
     <button id="save-btn">Save</button>
     <div id="status-msg"></div>
+
+    <hr />
+
+    <h3>Sharing workbooks</h3>
+    <p style="font-size:0.9em; color:#666; margin-top:4px;">
+        <code>=EXCELAI.AI()</code> formulas show <code>#NAME?</code> on machines without this add-in.
+        Click below to replace them with their current values before sharing.
+    </p>
+    <button id="freeze-btn">Freeze AI results</button>
 </body>
 
 </html>
