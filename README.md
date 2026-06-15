@@ -158,10 +158,10 @@ cd server && go build -ldflags="-s -w" -o excelai-server .
 ```
 +------------------+     HTTPS :11435     +------------------+     HTTP :11434     +------------------+
 |                  |  ================>   |                  |  ================>  |                  |
-|  Excel Add-in   |      same-origin     |  Go server       |      reverse proxy  |  Ollama          |
-|  (taskpane +    |  <================   |  (excelai-server) |  <================  |  (qwen2.5:1.5b)  |
-|   custom fns)   |     static files     |  ~8 MB binary    |      /v1/* /api/*   |  port 11434      |
-+------------------+                     +------------------+                     +------------------+
+|  Excel Add-in    |      same-origin     |  Go server       |      reverse proxy  |  Ollama          |
+|  (taskpane +     |  <================   | (excelai-server) |  <================  |  (qwen2.5:1.5b)  |
+|   custom fns)    |     static files     |  ~8 MB binary    |      /v1/* /api/*   |  port 11434      |
++------------------+                      +------------------+                     +------------------+
 ```
 
 **Why a Go server?** Office Add-ins must be served over HTTPS. Ollama only speaks HTTP. A Python proxy was tried first but required a Python runtime. The Go binary is ~8 MB, uses ~14 MB RSS at runtime, has zero dependencies, and embeds all static files via `go:embed`. It serves both the add-in UI and proxies API requests on the same origin, eliminating mixed-content and CORS issues entirely.
